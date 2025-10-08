@@ -122,7 +122,8 @@ export default function CocinarteMonthlyCalendar() {
       menu: [
         "Empanaditas de calabaza al horno → Baked Pumpkin Mini Empanadas",
         "Panecitos de manzana con dulce de leche → Apple Buns with Dulce de Leche"
-      ]
+      ],
+      image: "/pictures/calendar/pumpkinEmpanadas.jpg"
     },
     {
       id: "6",
@@ -135,7 +136,8 @@ export default function CocinarteMonthlyCalendar() {
         "Esquites Mexicanos (ranch-fusión) → Mexican Street Corn Cups (Ranch Fusion)",
         "Cocadas horneadas → Baked Coconut Cookies",
         "Atol de vainilla con canela → Vanilla Cinnamon Atol"
-      ]
+      ],
+      image: "/pictures/calendar/esquite.jpg"
     },
     {
       id: "7",
@@ -147,7 +149,8 @@ export default function CocinarteMonthlyCalendar() {
       menu: [
         "Tacos crujientes de camote y frijoles negros → Crispy Sweet Potato and Black Bean Tacos",
         "Torrejas de leche → Milk French Toast"
-      ]
+      ],
+      image: "/pictures/calendar/tacos.jpg"
     },
     {
       id: "8",
@@ -159,7 +162,8 @@ export default function CocinarteMonthlyCalendar() {
       menu: [
         "Monster guac + mini quesadillas → Monster Guacamole + Mini Quesadillas",
         "Calabacitas de Gelatina de Mango y Leche → Mango and Milk Gelatin"
-      ]
+      ],
+      image: "/pictures/calendar/quesadillas.jpg"
     },
     // November 2025
     {
@@ -173,7 +177,8 @@ export default function CocinarteMonthlyCalendar() {
         "Sopa de calabaza → Pumpkin Soup",
         "Pan de elote dulce → Sweet Cornbread",
         "Plátanos caramelizados en sartén → Pan-Fried Caramelized Plantains"
-      ]
+      ],
+      image: "/pictures/calendar/november/plantains.jpg"
     },
     {
       id: "10",
@@ -186,7 +191,8 @@ export default function CocinarteMonthlyCalendar() {
         "Empanaditas de pollo → Mini Chicken Empanadas",
         "Ensalada tibia de otoño → Warm Autumn Salad",
         "Chocolate de la Abuela → Grandma's Hot Chocolate"
-      ]
+      ],
+      image: "/pictures/calendar/november/chickenEmpanadas.jpg"
     },
     {
       id: "11",
@@ -198,7 +204,8 @@ export default function CocinarteMonthlyCalendar() {
       menu: [
         "Cazuelitas de maíz con pavo y verduras → Mini Corn Casseroles with Turkey and Vegetables",
         "Muffins de Plátano y Canela con Toque de Dulce de Leche → Banana Cinnamon Muffins with a Touch of Dulce de Leche"
-      ]
+      ],
+      image: "/pictures/calendar/november/turkeyCorn.jpg"
     },
     {
       id: "12",
@@ -211,7 +218,8 @@ export default function CocinarteMonthlyCalendar() {
         "Birria de pavo → Turkey Birria",
         "Sopes de frijoles con queso fresco → Bean Sopes with Fresh Cheese",
         "Ensalada de frutas latina → Latin-Style Fruit Salad"
-      ]
+      ],
+      image: "/pictures/calendar/november/quesabirria.jpg"
     },
     {
       id: "13",
@@ -223,7 +231,8 @@ export default function CocinarteMonthlyCalendar() {
       menu: [
         "Quiche de calabaza y queso latino → Pumpkin and Latin-Style Cheese Quiche",
         "Pie de pera → Pear Pie"
-      ]
+      ],
+      image: "/pictures/calendar/november/quiche.jpeg"
     },
     // December 2025
     {
@@ -237,7 +246,8 @@ export default function CocinarteMonthlyCalendar() {
         "Tabla de Quesos y Frutas Navideña → Christmas Cheese and Fruit Board",
         "Tabla de Verduras y Dip de Yogurt → Vegetable Board with Yogurt Dip",
         "Tabla Dulce de Frutas y Galletas → Sweet Fruit and Cookie Board"
-      ]
+      ],
+      image: "/pictures/calendar/december/christmasTree.jpg"
     },
     {
       id: "15",
@@ -250,7 +260,8 @@ export default function CocinarteMonthlyCalendar() {
         "Burritos de huevo y pavo estilo navideño → Christmas-Style Egg and Turkey Burritos",
         "Panqueques de calabaza con canela → Pumpkin Cinnamon Pancakes",
         "Parfaits navideños de yogurt, granola y fruta → Christmas Yogurt, Granola, and Fruit Parfaits"
-      ]
+      ],
+      image: "/pictures/calendar/december/burritos.jpg"
     },
     {
       id: "16",
@@ -262,7 +273,8 @@ export default function CocinarteMonthlyCalendar() {
       menu: [
         "Mini Rollitos de Pollo con Espinaca y Queso → Mini Spinach & Cheese Chicken Rolls",
         "Cheesecake Fácil al Estilo Latino → Easy Latin-Style Cheesecake"
-      ]
+      ],
+      image: "/pictures/calendar/december/chickenRolls.jpg"
     },
     {
       id: "17",
@@ -273,7 +285,8 @@ export default function CocinarteMonthlyCalendar() {
       price: 80,
       menu: [
         "Receta Básica de Galletas de Mantequilla para decorar → Basic Butter Cookie Recipe for Decorating"
-      ]
+      ],
+      image: "/pictures/calendar/december/cookies.jpg"
     },
     // January 2026
     {
