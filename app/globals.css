@@ -85,31 +85,42 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Coming Soon';
-  }
-  
-  /* Set Coming Soon as default font for all text elements */
-  h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label, li, td, th {
-    font-family: 'Coming Soon' !important;
-  }
-  
-  /* Override all specific font classes to use Coming Soon */
-  .font-questa, .font-playfair, .font-lora, .font-cormorant, .font-libre-baskerville, .font-poppins, .font-sf-pro, .font-ivry, .font-cta, .font-coming-soon {
-    font-family: 'Coming Soon' !important;
-  }
-  
-  /* Local Coming Soon font face */
+  /* Force Coming Soon font globally */
   @font-face {
     font-family: 'Coming Soon';
     src: url('/fonts/Coming_Soon/ComingSoon-Regular.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
+  }
+
+  * {
+    @apply border-border;
+    font-family: 'Coming Soon' !important;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Coming Soon' !important;
+  }
+  
+  html {
+    font-family: 'Coming Soon' !important;
+  }
+  
+  /* Force Coming Soon on all text elements */
+  h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label, li, td, th, ul, ol, dl, dt, dd, article, section, nav, aside, header, footer, main {
+    font-family: 'Coming Soon' !important;
+  }
+  
+  /* Override all specific font classes to use Coming Soon */
+  .font-questa, .font-playfair, .font-lora, .font-cormorant, .font-libre-baskerville, .font-poppins, .font-sf-pro, .font-ivry, .font-cta, .font-coming-soon, .font-sans, .font-serif, .font-mono {
+    font-family: 'Coming Soon' !important;
+  }
+  
+  /* Force all children elements */
+  * * {
+    font-family: 'Coming Soon' !important;
   }
   
   

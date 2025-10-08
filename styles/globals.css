@@ -1,3 +1,16 @@
+/* Force Coming Soon Font Globally */
+@font-face {
+  font-family: 'Coming Soon';
+  src: url('/fonts/Coming_Soon/ComingSoon-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  font-family: 'Coming Soon' !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,8 +96,13 @@
 @layer base {
   * {
     @apply border-border;
+    font-family: 'Coming Soon' !important;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Coming Soon' !important;
+  }
+  html {
+    font-family: 'Coming Soon' !important;
   }
 }
