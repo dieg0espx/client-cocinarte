@@ -1,0 +1,540 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* React Slick CSS */
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* Set Poppins as default font for all text elements */
+  h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label, li, td, th {
+    font-family: 'Poppins', sans-serif !important;
+  }
+  
+  /* Override all specific font classes to use Poppins */
+  .font-questa, .font-playfair, .font-lora, .font-cormorant, .font-libre-baskerville, .font-poppins, .font-sf-pro, .font-ivry {
+    font-family: 'Poppins', sans-serif !important;
+  }
+  
+  /* CTA font class - uses Playfair Display for call-to-action text */
+  .font-cta {
+    font-family: var(--font-playfair), 'Playfair Display', serif !important;
+  }
+  
+  /* Coming Soon font class for Cocinarte page */
+  .font-coming-soon {
+    font-family: 'Coming Soon', cursive !important;
+  }
+  
+  /* Local Coming Soon font face */
+  @font-face {
+    font-family: 'Coming Soon';
+    src: url('/fonts/Coming_Soon/ComingSoon-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  
+  /* Exclude Cocinarte and Casita Azul pages from Poppins font */
+  [data-page="cocinarte"] body,
+  [data-page="cocinarte"] h1,
+  [data-page="cocinarte"] h2,
+  [data-page="cocinarte"] h3,
+  [data-page="cocinarte"] h4,
+  [data-page="cocinarte"] h5,
+  [data-page="cocinarte"] h6,
+  [data-page="cocinarte"] p,
+  [data-page="cocinarte"] span,
+  [data-page="cocinarte"] div,
+  [data-page="cocinarte"] a,
+  [data-page="cocinarte"] button,
+  [data-page="cocinarte"] input,
+  [data-page="cocinarte"] textarea,
+  [data-page="cocinarte"] select,
+  [data-page="cocinarte"] label,
+  [data-page="cocinarte"] li,
+  [data-page="cocinarte"] td,
+  [data-page="cocinarte"] th {
+    font-family: inherit !important;
+  }
+  
+  [data-page="casita-azul"] body,
+  [data-page="casita-azul"] h1,
+  [data-page="casita-azul"] h2,
+  [data-page="casita-azul"] h3,
+  [data-page="casita-azul"] h4,
+  [data-page="casita-azul"] h5,
+  [data-page="casita-azul"] h6,
+  [data-page="casita-azul"] p,
+  [data-page="casita-azul"] span,
+  [data-page="casita-azul"] div,
+  [data-page="casita-azul"] a,
+  [data-page="casita-azul"] button,
+  [data-page="casita-azul"] input,
+  [data-page="casita-azul"] textarea,
+  [data-page="casita-azul"] select,
+  [data-page="casita-azul"] label,
+  [data-page="casita-azul"] li,
+  [data-page="casita-azul"] td,
+  [data-page="casita-azul"] th {
+    font-family: inherit !important;
+  }
+  
+  
+  /* Hide scrollbars for all elements */
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+  }
+  
+  /* Hide scrollbars for WebKit browsers (Chrome, Safari, Edge) */
+  *::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Ensure scrolling still works */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Fix mobile text wrapping */
+  * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: none;
+  }
+  
+  /* Ensure text doesn't overflow on mobile */
+  @media (max-width: 640px) {
+    * {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    
+    /* Force text to wrap properly on mobile */
+    p, span, div, h1, h2, h3, h4, h5, h6 {
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: none;
+      max-width: 100%;
+    }
+    
+    /* Ensure containers don't overflow */
+    .max-w-7xl {
+      max-width: 100vw;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+    
+    /* Force all text content to fit within viewport */
+    body {
+      overflow-x: hidden;
+      width: 100vw;
+    }
+    
+    /* Ensure all containers respect mobile width */
+    .container, .max-w-7xl, .mx-auto {
+      max-width: 100vw !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+    
+    /* Force text wrapping on all elements */
+    * {
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+      max-width: 100% !important;
+    }
+    
+    /* Force all text to fit within mobile viewport */
+    html {
+      width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    body {
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+    
+    /* Force all containers to respect mobile width */
+    div, section, article, main, aside, nav, header, footer {
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+    }
+  }
+  
+  /* 3D Flip Card Styles */
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  
+  /* Hide scrollbars for horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom date input styling */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    z-index: 2;
+  }
+  
+  /* Style the calendar popup - these only affect the input field, not the popup */
+  input[type="date"]::-webkit-datetime-edit {
+    color: #000638;
+    font-weight: 500;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    background: transparent;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-text {
+    color: #6b7280;
+    padding: 0 2px;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-month-field,
+  input[type="date"]::-webkit-datetime-edit-day-field,
+  input[type="date"]::-webkit-datetime-edit-year-field {
+    color: #000638;
+    background: transparent;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 0 1px;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit-month-field:focus,
+  input[type="date"]::-webkit-datetime-edit-day-field:focus,
+  input[type="date"]::-webkit-datetime-edit-year-field:focus {
+    background: #00ADEE;
+    color: white;
+    outline: none;
+  }
+
+  /* Ensure calendar popup is not blocked by other elements */
+  input[type="date"] {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Remove any potential overlays that might block the calendar */
+  .date-input-container {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Ensure the calendar popup appears above other elements */
+  input[type="date"]:focus {
+    z-index: 9999;
+  }
+
+  /* React DatePicker Custom Styling */
+  .react-datepicker-popper {
+    z-index: 9999 !important;
+  }
+
+  .react-datepicker-calendar {
+    border: 2px solid #00ADEE !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    font-family: inherit !important;
+  }
+
+  /* Cocinarte page DatePicker font styling */
+  [data-page="cocinarte"] .react-datepicker-calendar {
+    font-family: 'Coming Soon', cursive !important;
+  }
+
+  [data-page="cocinarte"] .react-datepicker__current-month {
+    font-family: 'Coming Soon', cursive !important;
+  }
+
+  [data-page="cocinarte"] .react-datepicker__day-name {
+    font-family: 'Coming Soon', cursive !important;
+  }
+
+  [data-page="cocinarte"] .react-datepicker__day {
+    font-family: 'Coming Soon', cursive !important;
+  }
+
+  .react-datepicker__header {
+    background: #00ADEE !important;
+    border-bottom: 2px solid #00ADEE !important;
+    border-radius: 10px 10px 0 0 !important;
+    padding: 16px !important;
+  }
+
+  .react-datepicker__current-month {
+    color: white !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+  }
+
+  .react-datepicker__day-names {
+    background: #f8fafc !important;
+    margin: 0 !important;
+    padding: 8px 0 !important;
+  }
+
+  .react-datepicker__day-name {
+    color: #000638 !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+  }
+
+  .react-datepicker__month {
+    background: white !important;
+    margin: 0 !important;
+    padding: 8px !important;
+  }
+
+  .react-datepicker__day {
+    color: #000638 !important;
+    border-radius: 6px !important;
+    margin: 2px !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 30px !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .react-datepicker__day:hover {
+    background: #00ADEE !important;
+    color: white !important;
+  }
+
+  .react-datepicker__day--selected {
+    background: #00ADEE !important;
+    color: white !important;
+    font-weight: bold !important;
+  }
+
+  .react-datepicker__day--today {
+    background: #fbbf24 !important;
+    color: #000638 !important;
+    font-weight: bold !important;
+  }
+
+  .react-datepicker__day--disabled {
+    color: #d1d5db !important;
+    cursor: not-allowed !important;
+  }
+
+  .react-datepicker__navigation {
+    top: 16px !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+  }
+
+  .react-datepicker__navigation:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .react-datepicker__navigation-icon::before {
+    border-color: white !important;
+    border-width: 2px 2px 0 0 !important;
+  }
+
+  .react-datepicker__close-icon {
+    background: #00ADEE !important;
+    border-radius: 0 10px 0 0 !important;
+  }
+
+  .react-datepicker__close-icon::after {
+    background: white !important;
+    color: white !important;
+  }
+
+  /* Additional DatePicker improvements */
+  .react-datepicker {
+    border: 2px solid #00ADEE !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    font-family: inherit !important;
+    background: white !important;
+  }
+
+  /* Floating animations for Cocinarte elements */
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(2deg);
+    }
+  }
+
+  @keyframes float-medium {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-15px) rotate(-2deg);
+    }
+  }
+
+  .animate-float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+  }
+
+  .animate-float-medium {
+    animation: float-medium 4s ease-in-out infinite;
+  }
+
+  .react-datepicker-popper {
+    padding: 0 !important;
+  }
+
+  .react-datepicker__day-name {
+    width: 32px !important;
+  }
+
+  .react-datepicker__day {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Fix input styling */
+  .react-datepicker__input-container input {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    border: 2px solid rgba(0, 173, 238, 0.3) !important;
+    border-radius: 12px !important;
+    background: rgba(0, 173, 238, 0.05) !important;
+    font-size: 14px !important;
+    color: #000638 !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .react-datepicker__input-container input:focus {
+    outline: none !important;
+    border-color: #f97316 !important;
+    box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2) !important;
+    background: rgba(0, 173, 238, 0.1) !important;
+  }
+
+  .react-datepicker__input-container input:hover {
+    background: rgba(0, 173, 238, 0.1) !important;
+  }
+}
+
+
+
+
+
+
+
+

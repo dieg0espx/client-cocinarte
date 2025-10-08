@@ -1,0 +1,31 @@
+{
+  "name": "Cocinarte",
+  "short_name": "Cocinarte",
+  "description": "Cooking classes celebrating Latin flavors for kids and families in Hillsboro, Oregon",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#1e293b",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["education", "lifestyle"]
+}
