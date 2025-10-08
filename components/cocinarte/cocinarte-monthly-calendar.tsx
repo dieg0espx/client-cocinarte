@@ -1094,7 +1094,7 @@ export default function CocinarteMonthlyCalendar() {
       {/* Class Details Modal */}
       {isDialogOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center -top-10">
-          <div className="w-[90vw] max-w-2xl max-h-[80vh] bg-white rounded-lg overflow-y-auto font-coming-soon p-4 sm:p-6" style={{ fontFamily: 'Coming Soon, cursive' }}>
+          <div className="w-[90vw] max-w-2xl max-h-[80vh] bg-white rounded-lg overflow-y-auto font-coming-soon p-4 sm:p-6" style={{ fontFamily: 'Coming Soon' }}>
           <div className="pb-4 relative">
             <button 
               onClick={() => setIsDialogOpen(false)}

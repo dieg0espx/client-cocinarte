@@ -12,19 +12,19 @@ const config: Config = {
   ],
   theme: {
   	extend: {
-  		fontFamily: {
-  			'sans': ['var(--font-inter)', 'system-ui', 'sans-serif'],
-  			'sf-pro': ['SF Pro Display', 'system-ui', 'sans-serif'],
-  			'serif': ['var(--font-playfair)', 'Georgia', 'serif'],
-  			'lora': ['var(--font-lora)', 'Georgia', 'serif'],
-  			'cormorant': ['var(--font-cormorant)', 'Georgia', 'serif'],
-  			'libre-baskerville': ['var(--font-libre-baskerville)', 'Georgia', 'serif'],
-  			'poppins': ['var(--font-poppins)', 'system-ui', 'sans-serif'],
-  			'questa': ['var(--font-playfair)', 'Georgia', 'serif'],
-  			'ivry': ['IvryOra Display', 'serif'],
-  			'mono': ['JetBrains Mono', 'Fira Code', 'monospace'],
-  			'coming-soon': ['Coming Soon', 'cursive']
-  		},
+		fontFamily: {
+			'sans': ['var(--font-inter)', 'system-ui', 'sans-serif'],
+			'sf-pro': ['SF Pro Display', 'system-ui', 'sans-serif'],
+			'serif': ['var(--font-playfair)', 'Georgia', 'serif'],
+			'lora': ['var(--font-lora)', 'Georgia', 'serif'],
+			'cormorant': ['var(--font-cormorant)', 'Georgia', 'serif'],
+			'libre-baskerville': ['var(--font-libre-baskerville)', 'Georgia', 'serif'],
+			'poppins': ['var(--font-poppins)', 'system-ui', 'sans-serif'],
+			'questa': ['var(--font-playfair)', 'Georgia', 'serif'],
+			'ivry': ['IvryOra Display', 'serif'],
+			'mono': ['JetBrains Mono', 'Fira Code', 'monospace'],
+			'coming-soon': ['Coming Soon']
+		},
 		colors: {
 			// Custom color palette
 			golden: {

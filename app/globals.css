@@ -90,17 +90,17 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Coming Soon', cursive;
+    font-family: 'Coming Soon';
   }
   
   /* Set Coming Soon as default font for all text elements */
   h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label, li, td, th {
-    font-family: 'Coming Soon', cursive !important;
+    font-family: 'Coming Soon' !important;
   }
   
   /* Override all specific font classes to use Coming Soon */
   .font-questa, .font-playfair, .font-lora, .font-cormorant, .font-libre-baskerville, .font-poppins, .font-sf-pro, .font-ivry, .font-cta, .font-coming-soon {
-    font-family: 'Coming Soon', cursive !important;
+    font-family: 'Coming Soon' !important;
   }
   
   /* Local Coming Soon font face */
@@ -295,19 +295,19 @@
 
   /* Cocinarte page DatePicker font styling */
   [data-page="cocinarte"] .react-datepicker-calendar {
-    font-family: 'Coming Soon', cursive !important;
+    font-family: 'Coming Soon' !important;
   }
 
   [data-page="cocinarte"] .react-datepicker__current-month {
-    font-family: 'Coming Soon', cursive !important;
+    font-family: 'Coming Soon' !important;
   }
 
   [data-page="cocinarte"] .react-datepicker__day-name {
-    font-family: 'Coming Soon', cursive !important;
+    font-family: 'Coming Soon' !important;
   }
 
   [data-page="cocinarte"] .react-datepicker__day {
-    font-family: 'Coming Soon', cursive !important;
+    font-family: 'Coming Soon' !important;
   }
 
   .react-datepicker__header {

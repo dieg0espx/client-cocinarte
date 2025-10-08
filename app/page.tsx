@@ -15,7 +15,7 @@ import Image from "next/image"
 export default function HomePage() {
   return (
     <>
-      <div className="min-h-screen bg-white font-coming-soon relative overflow-hidden" style={{ fontFamily: 'Coming Soon, cursive' }} data-page="cocinarte">
+      <div className="min-h-screen bg-white font-coming-soon relative overflow-hidden" style={{ fontFamily: 'Coming Soon' }} data-page="cocinarte">
         {/* Floating elements around the entire page - hidden on mobile for better performance */}
         <Image
           src="/cocinarte/floating_elements/COCINARTE_cupcakes.svg"
