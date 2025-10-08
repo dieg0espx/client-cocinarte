@@ -139,6 +139,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable} ${lora.variable} ${cormorant.variable} ${libreBaskerville.variable} ${poppins.variable} scroll-smooth`}>
       <head>
+        {/* Google Fonts - Coming Soon */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Coming+Soon&display=swap" rel="stylesheet" />
+        
         {/* Favicon Links */}
         <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
         <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml" />

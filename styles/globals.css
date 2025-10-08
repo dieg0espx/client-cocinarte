@@ -1,12 +1,4 @@
-/* Force Coming Soon Font Globally */
-@font-face {
-  font-family: 'Coming Soon';
-  src: url('/fonts/Coming_Soon/ComingSoon-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* Force Coming Soon Font from Google Fonts */
 * {
   font-family: 'Coming Soon' !important;
 }

@@ -85,15 +85,7 @@
 }
 
 @layer base {
-  /* Force Coming Soon font globally */
-  @font-face {
-    font-family: 'Coming Soon';
-    src: url('/fonts/Coming_Soon/ComingSoon-Regular.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-
+  /* Force Coming Soon font from Google Fonts */
   * {
     @apply border-border;
     font-family: 'Coming Soon' !important;
