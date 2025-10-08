@@ -37,7 +37,7 @@ export default function CocinarteAbout() {
             title="Hands-On Learning"
             description="Interactive cooking experiences where kids learn by doing"
             category="Learning"
-            imageSrc="/cocinarte/handsOnLearning.jpg"
+            imageSrc="/cocinarte/card1.jpg"
             detailedDescription="Interactive cooking experiences where kids learn by doing, building confidence and skills in the kitchen. Our hands-on approach ensures every child actively participates in creating delicious dishes."
             learningOutcomes={[
               "Build practical cooking skills and kitchen confidence",
@@ -50,7 +50,7 @@ export default function CocinarteAbout() {
             title="Latin Flavors"
             description="Explore authentic Latin American cuisine"
             category="Culture"
-            imageSrc="/cocinarte/latinFlavours.jpg"
+            imageSrc="/cocinarte/cocinarte3.jpeg"
             detailedDescription="Explore authentic Latin American cuisine and discover new flavors, ingredients, and cooking techniques. Each class introduces children to the rich culinary traditions of Latin America."
             learningOutcomes={[
               "Discover traditional Latin American ingredients and spices",
@@ -63,7 +63,7 @@ export default function CocinarteAbout() {
             title="Family Fun"
             description="Perfect for kids and families to cook together"
             category="Community"
-            imageSrc="/cocinarte/family.jpg"
+            imageSrc="/cocinarte/cocinarte10.jpeg"
             detailedDescription="Perfect for kids and families to cook together, creating lasting memories and bonding experiences. Our classes foster a warm, inclusive environment where everyone can learn and grow together."
             learningOutcomes={[
               "Strengthen family bonds through shared cooking experiences",
