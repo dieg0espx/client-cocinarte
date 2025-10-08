@@ -90,26 +90,16 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Coming Soon', cursive;
   }
   
-  /* Set Poppins as default font for all text elements */
+  /* Set Coming Soon as default font for all text elements */
   h1, h2, h3, h4, h5, h6, p, span, div, a, button, input, textarea, select, label, li, td, th {
-    font-family: 'Poppins', sans-serif !important;
+    font-family: 'Coming Soon', cursive !important;
   }
   
-  /* Override all specific font classes to use Poppins */
-  .font-questa, .font-playfair, .font-lora, .font-cormorant, .font-libre-baskerville, .font-poppins, .font-sf-pro, .font-ivry {
-    font-family: 'Poppins', sans-serif !important;
-  }
-  
-  /* CTA font class - uses Playfair Display for call-to-action text */
-  .font-cta {
-    font-family: var(--font-playfair), 'Playfair Display', serif !important;
-  }
-  
-  /* Coming Soon font class for Cocinarte page */
-  .font-coming-soon {
+  /* Override all specific font classes to use Coming Soon */
+  .font-questa, .font-playfair, .font-lora, .font-cormorant, .font-libre-baskerville, .font-poppins, .font-sf-pro, .font-ivry, .font-cta, .font-coming-soon {
     font-family: 'Coming Soon', cursive !important;
   }
   
@@ -120,51 +110,6 @@
     font-weight: normal;
     font-style: normal;
     font-display: swap;
-  }
-  
-  /* Exclude Cocinarte and Casita Azul pages from Poppins font */
-  [data-page="cocinarte"] body,
-  [data-page="cocinarte"] h1,
-  [data-page="cocinarte"] h2,
-  [data-page="cocinarte"] h3,
-  [data-page="cocinarte"] h4,
-  [data-page="cocinarte"] h5,
-  [data-page="cocinarte"] h6,
-  [data-page="cocinarte"] p,
-  [data-page="cocinarte"] span,
-  [data-page="cocinarte"] div,
-  [data-page="cocinarte"] a,
-  [data-page="cocinarte"] button,
-  [data-page="cocinarte"] input,
-  [data-page="cocinarte"] textarea,
-  [data-page="cocinarte"] select,
-  [data-page="cocinarte"] label,
-  [data-page="cocinarte"] li,
-  [data-page="cocinarte"] td,
-  [data-page="cocinarte"] th {
-    font-family: inherit !important;
-  }
-  
-  [data-page="casita-azul"] body,
-  [data-page="casita-azul"] h1,
-  [data-page="casita-azul"] h2,
-  [data-page="casita-azul"] h3,
-  [data-page="casita-azul"] h4,
-  [data-page="casita-azul"] h5,
-  [data-page="casita-azul"] h6,
-  [data-page="casita-azul"] p,
-  [data-page="casita-azul"] span,
-  [data-page="casita-azul"] div,
-  [data-page="casita-azul"] a,
-  [data-page="casita-azul"] button,
-  [data-page="casita-azul"] input,
-  [data-page="casita-azul"] textarea,
-  [data-page="casita-azul"] select,
-  [data-page="casita-azul"] label,
-  [data-page="casita-azul"] li,
-  [data-page="casita-azul"] td,
-  [data-page="casita-azul"] th {
-    font-family: inherit !important;
   }
   
   
