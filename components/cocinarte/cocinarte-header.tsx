@@ -152,17 +152,17 @@ export default function CocinarteHeader() {
   if (!isMounted) {
     return (
       <header className="bg-cocinarte-navy shadow-xl w-full fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1600px] mx-auto pl-0 pr-4 sm:px-6 lg:px-8 relative">
           <div className="flex items-center justify-between h-16 sm:h-20 lg:h-24">
             {/* Logo */}
-            <div className="flex items-center flex-shrink-0">
+            <div className="flex items-center flex-shrink-0 justify-start">
               <Link href="/" className="flex items-center group">
                 <Image 
                   src="/cocinarte/cocinarteLogo.png" 
                   alt="Cocinarte Logo" 
                   width={200} 
                   height={64} 
-                  className="object-contain h-12 sm:h-14 lg:h-20 max-w-[100px] sm:max-w-[120px] lg:max-w-[200px]" 
+                  className="object-contain object-left h-12 sm:h-14 lg:h-20 max-w-[100px] sm:max-w-[120px] lg:max-w-[200px]" 
                 />
               </Link>
             </div>
@@ -238,18 +238,18 @@ export default function CocinarteHeader() {
   }
 
   return (
-    <header className="bg-cocinarte-navy shadow-xl w-full fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 lg:h-24">
+    <header className="bg-cocinarte-navy shadow-xl w-full fixed top-0 left-0 right-0 z-50 ">
+      <div className="max-w-[1600px] mx-auto pl-0 pr-4 sm:px-6 lg:px-8 relative">
+        <div className="flex items-center justify-between h-16 sm:h-20 lg:h-24 ">
           {/* Logo */}
-          <div className="flex items-center flex-shrink-0">
+          <div className="flex items-center flex-shrink-0 justify-start">
             <Link href="/" className="flex items-center group">
               <Image 
                 src="/cocinarte/cocinarteLogo.png" 
                 alt="Cocinarte Logo" 
                 width={200} 
                 height={64} 
-                className="object-contain h-12 sm:h-14 lg:h-20 max-w-[100px] sm:max-w-[120px] lg:max-w-[200px]" 
+                className="object-contain object-left h-12 sm:h-14 lg:h-20 max-w-[100px] sm:max-w-[120px] lg:max-w-[200px]" 
               />
             </Link>
           </div>
@@ -334,7 +334,7 @@ export default function CocinarteHeader() {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`lg:hidden ${isMenuOpen ? 'block' : 'hidden'} absolute top-full left-0 right-0 bg-cocinarte-navy shadow-2xl border-t border-cocinarte-blue`}>
+        <div className={`lg:hidden ${isMenuOpen ? 'block' : 'hidden'} fixed top-[64px] sm:top-[80px] left-0 right-0 bg-cocinarte-navy shadow-2xl border-t border-cocinarte-blue z-40`}>
           <nav className="px-4 py-4 space-y-2">
             <Link
               href="#calendar"
@@ -378,7 +378,28 @@ export default function CocinarteHeader() {
             >
               FAQ
             </Link>
-            <div className="flex space-x-2">
+            <div className="space-y-2 pt-2">
+              <Button 
+                onClick={() => {
+                  handleAccountClick();
+                  setIsMenuOpen(false);
+                }}
+                className="w-full bg-white hover:bg-cocinarte-blue/90 text-cocinarte-navy font-medium py-3 text-sm rounded-xl shadow-lg transition-all duration-200"
+              >
+                <User className="w-4 h-4 mr-2" />
+                {user ? 'My Account' : 'Sign In'}
+              </Button>
+              <Button 
+                onClick={() => {
+                  setIsBookingOpen(true);
+                  setIsMenuOpen(false);
+                }}
+                className="w-full bg-cocinarte-red hover:bg-cocinarte-orange text-cocinarte-white font-medium py-3 text-sm rounded-xl shadow-lg transition-all duration-200"
+              >
+                Book Now
+              </Button>
+            </div>
+            <div className="flex space-x-2 pt-2">
               <Button className="flex-1 bg-cocinarte-yellow hover:bg-cocinarte-orange text-cocinarte-black font-medium py-3 text-sm rounded-xl shadow-lg transition-all duration-200">
                 <Link href="https://www.instagram.com/corcinartepdx/" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
                   <Instagram className="w-4 h-4 mr-2" />
