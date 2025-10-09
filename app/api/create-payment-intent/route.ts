@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Stripe expects amount in cents
       currency: 'usd',
-      description: `Booking for ${classTitle}`,
+      description: `${classTitle}${userName ? ` - ${userName}` : ''}`,
       metadata: {
         className: classTitle,
         customerName: userName || 'Guest',

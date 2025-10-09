@@ -164,7 +164,7 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
             body: JSON.stringify({
               amount: selectedClassData.price,
               classTitle: selectedClassData.title,
-              userName: user.user_metadata?.full_name || user.email,
+              userName: childName,
             }),
           })
 
