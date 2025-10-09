@@ -7,8 +7,7 @@ export async function POST(request: NextRequest) {
     const { 
       userEmail, 
       userName, 
-      studentName, 
-      studentEmail,
+      studentName,
       classTitle, 
       classDate, 
       classTime, 
@@ -25,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create transporter
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT || '587'),
       secure: process.env.SMTP_SECURE === 'true',
@@ -49,7 +48,49 @@ export async function POST(request: NextRequest) {
       hour12: true
     });
 
-    // Send email to user (parent/guardian)
+    // Admin notification email
+    const adminEmailContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🎉 New Booking Received!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">A new class has been booked</p>
+        </div>
+        
+        <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+          <h2 style="color: #1e3a8a; margin: 0 0 20px 0; font-size: 22px;">Booking Details</h2>
+          
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Class Information</h3>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Class:</strong> ${classTitle}</p>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Date:</strong> ${formattedDate}</p>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Time:</strong> ${formattedTime}</p>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Price:</strong> $${classPrice}</p>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Booking ID:</strong> ${bookingId}</p>
+          </div>
+
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Customer Information</h3>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Parent/Guardian:</strong> ${userName}</p>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Email:</strong> <a href="mailto:${userEmail}" style="color: #1e3a8a;">${userEmail}</a></p>
+            <p style="margin: 5px 0; color: #4b5563;"><strong>Student Name:</strong> ${studentName}</p>
+          </div>
+
+          <div style="background: #dbeafe; border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="color: #1e40af; margin: 0 0 10px 0; font-size: 16px;">📝 Action Required</h4>
+            <p style="color: #1e40af; margin: 0;">Please prepare materials and confirm class setup for this booking.</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const adminMailOptions = {
+      from: process.env.SMTP_FROM,
+      to: 'diego@comcreate.org',
+      subject: `New Booking: ${classTitle} - ${formattedDate}`,
+      html: adminEmailContent,
+    };
+
+    // User confirmation email
     const userEmailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -101,67 +142,18 @@ export async function POST(request: NextRequest) {
       html: userEmailContent,
     };
 
-    // Send email to student (if different email provided)
-    let studentMailOptions = null;
-    if (studentEmail && studentEmail !== userEmail) {
-      const studentEmailContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">¡Hola ${studentName}!</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your cooking class is confirmed!</p>
-          </div>
-          
-          <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-            <h2 style="color: #1e3a8a; margin: 0 0 20px 0; font-size: 22px;">Class Details</h2>
-            
-            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <p style="margin: 5px 0; color: #4b5563; font-size: 16px;"><strong>Class:</strong> ${classTitle}</p>
-              <p style="margin: 5px 0; color: #4b5563; font-size: 16px;"><strong>Date:</strong> ${formattedDate}</p>
-              <p style="margin: 5px 0; color: #4b5563; font-size: 16px;"><strong>Time:</strong> ${formattedTime}</p>
-            </div>
+    // Send both emails
+    const adminResult = await transporter.sendMail(adminMailOptions);
+    console.log('Admin notification email sent:', adminResult.messageId);
 
-            <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-              <h4 style="color: #92400e; margin: 0 0 10px 0; font-size: 16px;">🎉 What to Expect</h4>
-              <ul style="color: #92400e; margin: 0; padding-left: 20px;">
-                <li>Fun cooking activities designed just for you!</li>
-                <li>Learn new recipes and cooking techniques</li>
-                <li>Make new friends with other little chefs</li>
-                <li>Take home delicious food you made yourself</li>
-              </ul>
-            </div>
-
-            <div style="text-align: center; margin-top: 30px;">
-              <p style="color: #6b7280; margin: 0; font-size: 14px;">
-                See you soon, little chef! 👨‍🍳👩‍🍳
-              </p>
-            </div>
-          </div>
-        </div>
-      `;
-
-      studentMailOptions = {
-        from: process.env.SMTP_FROM,
-        to: studentEmail,
-        subject: `Your Cooking Class is Confirmed - ${classTitle}`,
-        html: studentEmailContent,
-      };
-    }
-
-    // Send emails
     const userResult = await transporter.sendMail(userMailOptions);
     console.log('User confirmation email sent:', userResult.messageId);
-
-    let studentResult = null;
-    if (studentMailOptions) {
-      studentResult = await transporter.sendMail(studentMailOptions);
-      console.log('Student confirmation email sent:', studentResult.messageId);
-    }
 
     return NextResponse.json({
       success: true,
       message: 'Confirmation emails sent successfully',
-      userEmailSent: !!userResult.messageId,
-      studentEmailSent: !!studentResult?.messageId
+      adminEmailSent: !!adminResult.messageId,
+      userEmailSent: !!userResult.messageId
     });
 
   } catch (error) {
