@@ -160,43 +160,57 @@ export function BookingsClient({ userId }: BookingsClientProps) {
         <CardDescription>Your latest cooking class bookings</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {bookings.slice(0, 5).map((booking) => (
-            <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center space-x-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                  <Calendar className="h-5 w-5" />
+            <div key={booking.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg gap-3 sm:gap-4">
+              {/* Mobile: Stack vertically, Desktop: Horizontal layout */}
+              <div className="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
+                <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 flex-shrink-0">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <p className="font-medium">{booking.class?.title || 'Unknown Class'}</p>
-                    <Badge className={getStatusColor(booking.booking_status)}>
+                <div className="flex-1 min-w-0">
+                  {/* Title and status on same line on mobile, separate on desktop */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 gap-1 sm:gap-2">
+                    <p className="font-medium text-sm sm:text-base truncate">{booking.class?.title || 'Unknown Class'}</p>
+                    <Badge className={`${getStatusColor(booking.booking_status)} text-xs flex-shrink-0 w-fit`}>
                       {getStatusIcon(booking.booking_status)}
                       <span className="ml-1 capitalize">{booking.booking_status}</span>
                     </Badge>
                   </div>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <User className="h-4 w-4 mr-1" />
+                  
+                  {/* Student info - full width on mobile */}
+                  <div className="flex items-center mt-1 sm:mt-0">
+                    <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm text-muted-foreground truncate">
                       {booking.student?.child_name || 'Unknown Student'}
+                    </span>
+                  </div>
+                  
+                  {/* Date and amount - stack on mobile, inline on desktop */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-1 sm:gap-0 mt-1">
+                    <div className="flex items-center">
+                      <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-muted-foreground">
+                        {booking.class?.date && format(new Date(booking.class.date), 'MMM dd, yyyy')}
+                      </span>
                     </div>
                     <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {booking.class?.date && format(new Date(booking.class.date), 'MMM dd, yyyy')}
-                    </div>
-                    <div className="flex items-center">
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      ${booking.payment_amount}
+                      <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+                        ${booking.payment_amount}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-end space-y-1">
-                <Badge className={getPaymentStatusColor(booking.payment_status)}>
+              
+              {/* Payment status and booking date - right aligned */}
+              <div className="flex flex-col sm:flex-col items-start sm:items-end space-y-1 sm:space-y-1">
+                <Badge className={`${getPaymentStatusColor(booking.payment_status)} text-xs w-fit`}>
                   {booking.payment_status}
                 </Badge>
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(booking.booking_date), 'MMM dd, yyyy')}
+                  Booked: {format(new Date(booking.booking_date), 'MMM dd, yyyy')}
                 </p>
               </div>
             </div>
