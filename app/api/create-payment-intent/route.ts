@@ -27,9 +27,8 @@ export async function POST(request: NextRequest) {
         className: classTitle,
         customerName: userName || 'Guest',
       },
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      // Show only credit/debit card in PaymentElement
+      payment_method_types: ['card'],
     });
 
     return NextResponse.json({
