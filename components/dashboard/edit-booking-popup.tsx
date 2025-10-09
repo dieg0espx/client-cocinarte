@@ -107,15 +107,15 @@ export function EditBookingPopup({ booking, isOpen, onClose, onSave }: EditBooki
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Edit Booking</DialogTitle>
           <DialogDescription>
             Update the booking information for {booking.student?.child_name}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 overflow-y-auto flex-1 pr-2">
           {/* Class Information (Read-only) */}
           <Card>
             <CardHeader>
@@ -147,7 +147,7 @@ export function EditBookingPopup({ booking, isOpen, onClose, onSave }: EditBooki
           </Card>
 
           {/* Editable Fields */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="booking_status">Booking Status</Label>
               <Select
@@ -185,7 +185,7 @@ export function EditBookingPopup({ booking, isOpen, onClose, onSave }: EditBooki
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="payment_amount">Payment Amount</Label>
               <Input
@@ -236,12 +236,12 @@ export function EditBookingPopup({ booking, isOpen, onClose, onSave }: EditBooki
           )}
 
           {/* Actions */}
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={handleCancel} disabled={loading}>
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 flex-shrink-0 pt-4 border-t">
+            <Button variant="outline" onClick={handleCancel} disabled={loading} className="w-full sm:w-auto">
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={loading}>
+            <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto">
               <Save className="h-4 w-4 mr-2" />
               {loading ? 'Saving...' : 'Save Changes'}
             </Button>
