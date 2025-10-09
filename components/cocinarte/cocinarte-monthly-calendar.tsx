@@ -1031,9 +1031,16 @@ export default function CocinarteMonthlyCalendar() {
             >
               <CardHeader>
                   <div className="flex items-center justify-between">
-                    <Badge className={`${getTypeColor(classItem.type, classItem.price)} font-bold`}>
-                      {getTypeLabel(classItem.type)}
-                    </Badge>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className={`${getTypeColor(classItem.type, classItem.price)} font-bold`}>
+                        {getTypeLabel(classItem.type)}
+                      </Badge>
+                      {classItem.class_type && (
+                        <Badge className="bg-cocinarte-navy text-cocinarte-white font-bold text-xs">
+                          {classItem.class_type}
+                        </Badge>
+                      )}
+                    </div>
                     {classItem.type === 'mini-chef' ? (
                       <ChefHat className="h-6 w-6 text-cocinarte-yellow" />
                     ) : (
