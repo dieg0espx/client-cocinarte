@@ -271,6 +271,36 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
       const clasesService = new ClasesClientService()
       await clasesService.updateClassEnrollment(selectedClassData.id, 1)
       
+      // Send confirmation emails
+      try {
+        const emailResponse = await fetch('/api/booking-confirmation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userEmail: user.email,
+            userName: user.user_metadata?.full_name || user.email,
+            studentName: studentInfo.child_name,
+            studentEmail: studentInfo.email,
+            classTitle: selectedClassData.title,
+            classDate: selectedClassData.date,
+            classTime: selectedClassData.time,
+            classPrice: selectedClassData.price,
+            bookingId: `BK-${Date.now()}` // Generate a simple booking ID
+          })
+        })
+
+        if (!emailResponse.ok) {
+          console.error('Failed to send confirmation emails')
+        } else {
+          console.log('Confirmation emails sent successfully')
+        }
+      } catch (emailError) {
+        console.error('Error sending confirmation emails:', emailError)
+        // Don't fail the booking if email fails
+      }
+      
       // Payment successful, show confirmation
       setAuthStep('confirmation')
     } catch (error) {
