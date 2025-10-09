@@ -450,16 +450,7 @@ export default function CocinarteMonthlyCalendar() {
     }
   }
 
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case "mini-chef":
-        return "Mini Chef"
-      case "mom-me":
-        return "Mom & Me"
-      default:
-        return "Class"
-    }
-  }
+
 
   const handleClassClick = (classItem: CalendarClass) => {
     console.log('Class clicked:', classItem)
@@ -824,7 +815,7 @@ export default function CocinarteMonthlyCalendar() {
     return currentClasses.map(classItem => `
       <div class="class-card">
         <div class="class-card-header">
-          <span class="class-badge ${classItem.type}">${getTypeLabel(classItem.type)}</span>
+
         </div>
         <div class="class-title">${classItem.title}</div>
         <div class="class-date">
@@ -1032,20 +1023,12 @@ export default function CocinarteMonthlyCalendar() {
               <CardHeader>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge className={`${getTypeColor(classItem.type, classItem.price)} font-bold`}>
-                        {getTypeLabel(classItem.type)}
-                      </Badge>
                       {classItem.class_type && (
                         <Badge className="bg-cocinarte-navy text-cocinarte-white font-bold text-xs">
                           {classItem.class_type}
                         </Badge>
                       )}
                     </div>
-                    {classItem.type === 'mini-chef' ? (
-                      <ChefHat className="h-6 w-6 text-cocinarte-yellow" />
-                    ) : (
-                      <Users className="h-6 w-6 text-cocinarte-orange" />
-                    )}
                   </div>
                 <CardTitle className="text-xl text-slate">{classItem.title}</CardTitle>
                 <CardDescription className="text-slate-medium">
@@ -1118,9 +1101,7 @@ export default function CocinarteMonthlyCalendar() {
             </button>
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 pr-8">
               <div className="flex items-center gap-2">
-                <Badge className={`${selectedClass ? getTypeColor(selectedClass.type, selectedClass.price) : ''} font-bold w-fit`}>
-                  {selectedClass ? getTypeLabel(selectedClass.type) : ''}
-                </Badge>
+
                 {selectedClass?.class_type && (
                   <Badge className="bg-cocinarte-navy text-cocinarte-white font-bold w-fit">
                     {selectedClass.class_type}
@@ -1181,7 +1162,13 @@ export default function CocinarteMonthlyCalendar() {
 
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-3 sm:pt-4">
-                <Button className="bg-cocinarte-red hover:bg-cocinarte-orange text-cocinarte-white font-bold rounded-xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-base lg:text-lg flex-[0.7]">
+                <Button 
+                  onClick={() => {
+                    setIsDialogOpen(false)
+                    setIsBookingOpen(true)
+                  }}
+                  className="bg-cocinarte-red hover:bg-cocinarte-orange text-cocinarte-white font-bold rounded-xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-base lg:text-lg flex-[0.7]"
+                >
                   Book This Class
                 </Button>
                 <Button 
