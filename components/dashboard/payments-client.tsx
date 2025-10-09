@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -27,6 +28,7 @@ function getParentName(std: BookingRow['student']): string | undefined {
 }
 
 export default function PaymentsClient({ initialBookings }: { initialBookings: BookingRow[] }) {
+  const router = useRouter()
   const [bookings, setBookings] = useState<BookingRow[]>(initialBookings)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [globalBusy, setGlobalBusy] = useState(false)
@@ -36,7 +38,12 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
     // Optimistic UI already applied; keep as-is for now.
   }
 
-  const markAsPaid = async (id: string) => {
+  const handleRowClick = (id: string) => {
+    router.push(`/dashboard/bookings?id=${id}`)
+  }
+
+  const markAsPaid = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent row click
     setBusyId(id)
     try {
       const api = new BookingsClientService()
@@ -72,7 +79,7 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {bookings.slice(0, 10).map((b) => {
               const paid = b.payment_status === 'completed'
               const date = new Date(b.booking_date)
@@ -80,25 +87,29 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
               const parentName = getParentName(b.student) || 'Unknown Customer'
               const classTitle = getClassTitle(b.class) || 'Cooking Class'
               return (
-                <div key={b.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-full ${paid ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
+                <div 
+                  key={b.id} 
+                  onClick={() => handleRowClick(b.id)}
+                  className="max-w-[300px] p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow hover:border-cocinarte-navy/30"
+                >
+                  <div className="flex items-start space-x-3 mb-3">
+                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${paid ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
                       <DollarSign className="h-5 w-5" />
                     </div>
-                    <div>
-                      <p className="font-medium">{parentName}</p>
-                      <p className="text-sm text-muted-foreground">{classTitle}</p>
-                      <p className="text-sm text-muted-foreground">{dateLabel}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{parentName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{classTitle}</p>
+                      <p className="text-xs text-muted-foreground">{dateLabel}</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="text-right mr-2">
-                      <p className={`font-medium ${paid ? 'text-green-600' : 'text-orange-600'}`}>{currency(b.payment_amount || 0)}</p>
-                      <Badge variant={paid ? 'secondary' : 'outline'}>{paid ? 'Paid' : b.payment_status === 'refunded' ? 'Refunded' : 'Pending'}</Badge>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className={`font-bold text-lg ${paid ? 'text-green-600' : 'text-orange-600'}`}>{currency(b.payment_amount || 0)}</p>
+                      <Badge variant={paid ? 'secondary' : 'outline'} className="text-xs">{paid ? 'Paid' : b.payment_status === 'refunded' ? 'Refunded' : 'Pending'}</Badge>
                     </div>
                     {b.payment_status !== 'completed' && (
-                      <Button size="sm" variant="outline" onClick={() => markAsPaid(b.id)} disabled={busyId === b.id}>
-                        <CreditCard className="h-3 w-3 mr-1" /> Mark paid
+                      <Button size="sm" variant="outline" onClick={(e) => markAsPaid(b.id, e)} disabled={busyId === b.id} className="ml-2">
+                        <CreditCard className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
@@ -106,7 +117,7 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
               )
             })}
             {bookings.length === 0 && (
-              <div className="text-sm text-muted-foreground">No payments found.</div>
+              <div className="col-span-full text-center text-sm text-muted-foreground py-8">No payments found.</div>
             )}
           </div>
         </CardContent>
