@@ -20,9 +20,11 @@ export class CalendarClassesService {
   private supabase = createClient();
 
   async getAllCalendarClases(): Promise<CalendarClass[]> {
+    const today = new Date().toISOString().split('T')[0]
     const { data, error } = await this.supabase
       .from('clases')
       .select('*')
+      .gte('date', today)
       .order('date', { ascending: true });
 
     if (error) {
@@ -34,10 +36,14 @@ export class CalendarClassesService {
   }
 
   async getClasesByDateRange(startDate: string, endDate: string): Promise<CalendarClass[]> {
+    // Ensure we never return classes in the past
+    const today = new Date().toISOString().split('T')[0]
+    const effectiveStart = startDate < today ? today : startDate
+
     const { data, error } = await this.supabase
       .from('clases')
       .select('*')
-      .gte('date', startDate)
+      .gte('date', effectiveStart)
       .lte('date', endDate)
       .order('date', { ascending: true });
 
