@@ -107,15 +107,16 @@ export function EditBookingPopup({ booking, isOpen, onClose, onSave }: EditBooki
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="flex-shrink-0 p-6 pb-4">
           <DialogTitle>Edit Booking</DialogTitle>
           <DialogDescription>
             Update the booking information for {booking.student?.child_name}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 sm:space-y-6 overflow-y-auto flex-1 pr-2">
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="space-y-4 sm:space-y-6">
           {/* Class Information (Read-only) */}
           <Card>
             <CardHeader>
@@ -236,7 +237,7 @@ export function EditBookingPopup({ booking, isOpen, onClose, onSave }: EditBooki
           )}
 
           {/* Actions */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 flex-shrink-0 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4 border-t">
             <Button variant="outline" onClick={handleCancel} disabled={loading} className="w-full sm:w-auto">
               <X className="h-4 w-4 mr-2" />
               Cancel
@@ -245,6 +246,7 @@ export function EditBookingPopup({ booking, isOpen, onClose, onSave }: EditBooki
               <Save className="h-4 w-4 mr-2" />
               {loading ? 'Saving...' : 'Save Changes'}
             </Button>
+          </div>
           </div>
         </div>
       </DialogContent>

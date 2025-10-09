@@ -54,15 +54,16 @@ export function BookingDetailsPopup({ booking, isOpen, onClose }: BookingDetails
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-2xl h-[90vh] flex flex-col p-0">
+        <DialogHeader className="flex-shrink-0 p-6 pb-4">
           <DialogTitle>Booking Details</DialogTitle>
           <DialogDescription>
             Complete information about this cooking class booking
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 overflow-y-auto flex-1 pr-2">
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="space-y-4">
           {/* Class Information */}
           <Card>
             <CardHeader className="pb-3">
@@ -198,13 +199,14 @@ export function BookingDetailsPopup({ booking, isOpen, onClose }: BookingDetails
           )}
 
           {/* Actions */}
-          <div className="flex justify-end space-x-2 flex-shrink-0 pt-4 border-t">
+          <div className="flex justify-end space-x-2 pt-4 border-t">
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
             <Button>
               Edit Booking
             </Button>
+          </div>
           </div>
         </div>
       </DialogContent>
