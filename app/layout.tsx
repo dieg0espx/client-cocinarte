@@ -59,19 +59,19 @@ const poppins = Poppins({
 
 
 export const metadata: Metadata = {
-  title: "Cocinarte - Cooking Adventures for Kids & Families",
-  description: "A cooking program designed for kids and families to explore Latin flavors while learning hands-on cooking skills. Fun, interactive, and age-appropriate classes.",
+  title: "Cocinarte - Cooking Classes for Kids in Hillsboro, Oregon",
+  description: "Cocinarte offers hands-on cooking classes for kids ages 5-12 in Hillsboro, Oregon. Learn to cook delicious Latin-inspired dishes while building confidence and life skills in a fun, safe environment.",
   keywords: [
-    "cooking classes for kids",
-    "Latin American cuisine",
-    "family cooking",
-    "kids cooking program",
-    "hands-on learning",
-    "Spanish cooking",
     "Cocinarte",
-    "Hillsboro Oregon",
-    "cooking education",
-    "family activities"
+    "cooking classes for kids Hillsboro",
+    "kids cooking classes Oregon",
+    "children cooking program",
+    "Latin cuisine for kids",
+    "hands-on cooking lessons",
+    "culinary classes children",
+    "after school cooking program",
+    "kids culinary education",
+    "family cooking classes Oregon"
   ],
   authors: [{ name: "Cocinarte" }],
   creator: "Cocinarte",
@@ -86,8 +86,8 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: "Cocinarte - Cooking Adventures for Kids & Families",
-    description: "A cooking program designed for kids and families to explore Latin flavors while learning hands-on cooking skills. Fun, interactive, and age-appropriate classes.",
+    title: "Cocinarte - Cooking Classes for Kids in Hillsboro, Oregon",
+    description: "Cocinarte offers hands-on cooking classes for kids ages 5-12 in Hillsboro, Oregon. Learn to cook delicious Latin-inspired dishes while building confidence and life skills in a fun, safe environment.",
     url: 'https://cocinarte.com',
     siteName: 'Cocinarte',
     images: [
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
         url: '/hero.png',
         width: 1200,
         height: 630,
-        alt: 'Cocinarte - Cooking Adventures for Kids & Families',
+        alt: 'Cocinarte - Cooking Classes for Kids in Hillsboro, Oregon',
       },
     ],
     locale: 'en_US',
@@ -103,8 +103,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Cocinarte - Cooking Adventures for Kids & Families",
-    description: "A cooking program designed for kids and families to explore Latin flavors while learning hands-on cooking skills. Fun, interactive, and age-appropriate classes.",
+    title: "Cocinarte - Cooking Classes for Kids in Hillsboro, Oregon",
+    description: "Cocinarte offers hands-on cooking classes for kids ages 5-12 in Hillsboro, Oregon. Learn to cook delicious Latin-inspired dishes while building confidence and life skills in a fun, safe environment.",
     images: ['/hero.png'],
   },
   robots: {
@@ -124,7 +124,7 @@ export const metadata: Metadata = {
     yahoo: 'your-yahoo-verification-code',
   },
   category: 'education',
-  classification: 'Cooking Program',
+  classification: 'Kids Cooking Classes - Hillsboro, Oregon',
   other: {
     'msapplication-TileColor': '#1e293b',
     'theme-color': '#1e293b',
@@ -177,9 +177,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "EducationalOrganization",
               "name": "Cocinarte",
-              "description": "A cooking program designed for kids and families to explore Latin flavors while learning hands-on cooking skills. Fun, interactive, and age-appropriate classes.",
+              "description": "Cocinarte offers hands-on cooking classes for kids ages 5-12 in Hillsboro, Oregon. Learn to cook delicious Latin-inspired dishes while building confidence and life skills in a fun, safe environment.",
               "url": "https://cocinarte.com",
               "logo": "https://cocinarte.com/hero.png",
+              "image": "https://cocinarte.com/hero.png",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "770 NE Rogahn Street",
@@ -189,12 +190,17 @@ export default function RootLayout({
                 "addressCountry": "US"
               },
               "telephone": "+1-503-916-9758",
-              "email": "infospanishhorizons@casitaazulpdx.com",
+              "email": "info@cocinarte.com",
               "areaServed": {
                 "@type": "City",
                 "name": "Hillsboro"
               },
-              "serviceType": "Cooking Classes for Kids and Families"
+              "priceRange": "$$",
+              "serviceType": "Kids Cooking Classes",
+              "audience": {
+                "@type": "Audience",
+                "audienceType": "Children ages 5-12"
+              }
             })
           }}
         />
