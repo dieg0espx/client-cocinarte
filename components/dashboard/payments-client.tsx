@@ -103,7 +103,7 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {bookings.slice(0, 10).map((b) => {
               const paid = b.payment_status === 'completed'
               const date = new Date(b.booking_date)
@@ -114,25 +114,25 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
                 <div 
                   key={b.id} 
                   onClick={() => handleRowClick(b.id)}
-                  className="max-w-[300px] p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow hover:border-cocinarte-navy/30"
+                  className="w-full max-w-[300px] p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow hover:border-cocinarte-navy/30"
                 >
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${paid ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
-                      <DollarSign className="h-5 w-5" />
+                  <div className="flex items-start space-x-2 sm:space-x-3 mb-2 sm:mb-3">
+                    <div className={`flex h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 items-center justify-center rounded-full ${paid ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
+                      <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{parentName}</p>
-                      <p className="text-xs text-muted-foreground truncate">{classTitle}</p>
-                      <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                      <p className="font-medium text-xs sm:text-sm truncate">{parentName}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{classTitle}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">{dateLabel}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className={`font-bold text-lg ${paid ? 'text-green-600' : 'text-orange-600'}`}>{currency(b.payment_amount || 0)}</p>
-                      <Badge variant={paid ? 'secondary' : 'outline'} className="text-xs">{paid ? 'Paid' : b.payment_status === 'refunded' ? 'Refunded' : 'Pending'}</Badge>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-bold text-base sm:text-lg ${paid ? 'text-green-600' : 'text-orange-600'}`}>{currency(b.payment_amount || 0)}</p>
+                      <Badge variant={paid ? 'secondary' : 'outline'} className="text-[10px] sm:text-xs">{paid ? 'Paid' : b.payment_status === 'refunded' ? 'Refunded' : 'Pending'}</Badge>
                     </div>
                     {b.payment_status !== 'completed' && (
-                      <Button size="sm" variant="outline" onClick={(e) => markAsPaid(b.id, e)} disabled={busyId === b.id} className="ml-2">
+                      <Button size="sm" variant="outline" onClick={(e) => markAsPaid(b.id, e)} disabled={busyId === b.id} className="flex-shrink-0">
                         <CreditCard className="h-3 w-3" />
                       </Button>
                     )}
@@ -156,18 +156,18 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-20 flex-col space-y-2" onClick={handleQuickRecordPayment} disabled={globalBusy}>
-              <CreditCard className="h-6 w-6" />
-              <span>Record Payment</span>
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2" onClick={handleQuickRecordPayment} disabled={globalBusy}>
+              <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-xs sm:text-sm">Record Payment</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col space-y-2" disabled>
-              <Calendar className="h-6 w-6" />
-              <span>Payment Schedule</span>
+            <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2" disabled>
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-xs sm:text-sm">Payment Schedule</span>
             </Button>
-            <Button variant="outline" className="h-20 flex-col space-y-2" disabled>
-              <DollarSign className="h-6 w-6" />
-              <span>Generate Invoice</span>
+            <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2" disabled>
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-xs sm:text-sm">Generate Invoice</span>
             </Button>
           </div>
         </CardContent>

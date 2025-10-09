@@ -69,30 +69,31 @@ export default async function PaymentsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Cocinarte Payments</h1>
-            <p className="text-muted-foreground">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Cocinarte Payments</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Track Cocinarte cooking class payments and manage billing.
             </p>
           </div>
-          <Button>
+          <Button className="w-full sm:w-auto flex-shrink-0">
             <Plus className="h-4 w-4 mr-2" />
-            Record Cooking Class Payment
+            <span className="hidden sm:inline">Record Cooking Class Payment</span>
+            <span className="sm:hidden">Record Payment</span>
           </Button>
         </div>
 
         {/* Payment Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currency(totalRevenue)}</div>
+              <div className="text-xl sm:text-2xl font-bold">{currency(totalRevenue)}</div>
               <p className="text-xs text-muted-foreground">
                 Cocinarte revenue this month
               </p>
@@ -101,37 +102,37 @@ export default async function PaymentsPage() {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Cooking Class Payments</CardTitle>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Pending Payments</CardTitle>
+              <CreditCard className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currency(pendingAmount)}</div>
+              <div className="text-xl sm:text-2xl font-bold">{currency(pendingAmount)}</div>
               <p className="text-xs text-muted-foreground">
-                Outstanding cooking class payments
+                Outstanding payments
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Paid This Month</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Paid This Month</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currency(paidThisMonth)}</div>
+              <div className="text-xl sm:text-2xl font-bold">{currency(paidThisMonth)}</div>
               <p className="text-xs text-muted-foreground">
-                Sum of completed payments this month
+                Completed this month
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Average Cooking Class Fee</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Average Fee</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{currency(averageFee)}</div>
+              <div className="text-xl sm:text-2xl font-bold">{currency(averageFee)}</div>
               <p className="text-xs text-muted-foreground">
                 Per cooking class
               </p>

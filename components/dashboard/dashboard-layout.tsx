@@ -107,17 +107,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </SidebarFooter>
         </Sidebar>
         
-        <main className="flex-1 flex flex-col">
-          <header className="flex h-16 items-center gap-4 border-b bg-background px-4">
-            <SidebarTrigger />
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold">
+        <main className="flex-1 flex flex-col w-full overflow-x-hidden">
+          <header className="flex h-14 sm:h-16 items-center gap-2 sm:gap-4 border-b bg-background px-3 sm:px-4 lg:px-6">
+            <SidebarTrigger className="flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h1 className="text-base sm:text-lg lg:text-xl font-semibold truncate">
                 {navigationItems.find(item => item.url === pathname)?.title || "Dashboard"}
               </h1>
             </div>
           </header>
           
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
             {children}
           </div>
         </main>

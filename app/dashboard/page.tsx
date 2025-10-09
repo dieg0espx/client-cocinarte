@@ -19,12 +19,12 @@ export default async function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Welcome Section */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Cocinarte Dashboard</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Cocinarte Dashboard</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Welcome back! Here's a summary of your Cocinarte cooking programs.
             </p>
           </div>
