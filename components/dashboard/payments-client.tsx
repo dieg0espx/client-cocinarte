@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { DollarSign, CreditCard, Calendar } from 'lucide-react'
+import { DollarSign, CreditCard } from 'lucide-react'
 import { BookingsClientService } from '@/lib/supabase/bookings-client'
 import { BookingDetailsPopup } from './booking-details-popup'
 import { BookingWithDetails } from '@/lib/types/bookings'
@@ -31,7 +31,6 @@ function getParentName(std: BookingRow['student']): string | undefined {
 export default function PaymentsClient({ initialBookings }: { initialBookings: BookingRow[] }) {
   const [bookings, setBookings] = useState<BookingRow[]>(initialBookings)
   const [busyId, setBusyId] = useState<string | null>(null)
-  const [globalBusy, setGlobalBusy] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [loadingBooking, setLoadingBooking] = useState(false)
@@ -73,18 +72,6 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
     }
   }
 
-  const handleQuickRecordPayment = async () => {
-    // Mark the first pending booking as paid (simple quick action)
-    setGlobalBusy(true)
-    try {
-      const pending = bookings.find(b => b.payment_status === 'pending')
-      if (pending) {
-        await markAsPaid(pending.id)
-      }
-    } finally {
-      setGlobalBusy(false)
-    }
-  }
 
   return (
     <>
@@ -143,32 +130,6 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
             {bookings.length === 0 && (
               <div className="col-span-full text-center text-sm text-muted-foreground py-8">No payments found.</div>
             )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Common payment management tasks
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2" onClick={handleQuickRecordPayment} disabled={globalBusy}>
-              <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="text-xs sm:text-sm">Record Payment</span>
-            </Button>
-            <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2" disabled>
-              <Calendar className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="text-xs sm:text-sm">Payment Schedule</span>
-            </Button>
-            <Button variant="outline" className="h-16 sm:h-20 flex-col space-y-1 sm:space-y-2" disabled>
-              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="text-xs sm:text-sm">Generate Invoice</span>
-            </Button>
           </div>
         </CardContent>
       </Card>
