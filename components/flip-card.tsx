@@ -45,7 +45,7 @@ export default function FlipCard({
 
   return (
     <div 
-      className="relative w-[280px] sm:w-[350px] md:w-[400px] lg:w-[28rem] h-[220px] sm:h-[280px] md:h-[320px] lg:h-[22rem] flex-shrink-0"
+      className="relative w-full sm:w-[350px] md:w-[400px] lg:w-[28rem] h-[220px] sm:h-[280px] md:h-[320px] lg:h-[22rem] flex-shrink-0"
       onMouseEnter={() => !isMobile && setIsFlipped(true)}
       onMouseLeave={() => !isMobile && setIsFlipped(false)}
       onClick={handleInteraction}
