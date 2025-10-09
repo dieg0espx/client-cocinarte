@@ -14,6 +14,11 @@ import { ClasesClientService } from "@/lib/supabase/clases-client"
 import { StudentsClientService } from "@/lib/supabase/students-client"
 import { BookingsClientService } from "@/lib/supabase/bookings-client"
 import { useAuth } from "@/contexts/auth-context"
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements } from '@stripe/react-stripe-js'
+import StripePaymentForm from './stripe-payment-form'
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 interface BookingPopupProps {
   isOpen: boolean
@@ -50,8 +55,12 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
   const [cardName, setCardName] = useState('')
   const [paymentLoading, setPaymentLoading] = useState(false)
   const [paymentError, setPaymentError] = useState('')
+  const [clientSecret, setClientSecret] = useState<string>('')
+  const [paymentIntentId, setPaymentIntentId] = useState<string>('')
   
   const { user, signIn, signUp } = useAuth()
+
+  const selectedClassData = classes.find(c => c.id === selectedClassId)
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -138,6 +147,45 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     
     handlePostSignup()
   }, [user, isOpen])
+
+  // Create payment intent when entering payment step
+  useEffect(() => {
+    const createPaymentIntent = async () => {
+      if (authStep === 'payment' && selectedClassData && user && !clientSecret) {
+        setPaymentLoading(true)
+        setPaymentError('')
+        
+        try {
+          const response = await fetch('/api/create-payment-intent', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              amount: selectedClassData.price,
+              classTitle: selectedClassData.title,
+              userName: user.user_metadata?.full_name || user.email,
+            }),
+          })
+
+          if (!response.ok) {
+            throw new Error('Failed to create payment intent')
+          }
+
+          const data = await response.json()
+          setClientSecret(data.clientSecret)
+          setPaymentIntentId(data.paymentIntentId)
+        } catch (error) {
+          console.error('Error creating payment intent:', error)
+          setPaymentError('Failed to initialize payment. Please try again.')
+        } finally {
+          setPaymentLoading(false)
+        }
+      }
+    }
+
+    createPaymentIntent()
+  }, [authStep, selectedClassData, user, clientSecret])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -272,17 +320,9 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     resetAuthForm()
   }
 
-  const handlePayment = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handlePaymentSuccess = async () => {
     setPaymentLoading(true)
     setPaymentError('')
-
-    // Validate payment form
-    if (!cardNumber || !expiryDate || !cvv || !cardName) {
-      setPaymentError('Please fill in all payment fields')
-      setPaymentLoading(false)
-      return
-    }
 
     // Validate required data
     if (!user || !selectedClassData) {
@@ -292,9 +332,6 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     }
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API call
-      
       // Get student information
       const studentsService = new StudentsClientService()
       const studentInfo = await studentsService.getStudentByEmail(user.email!)
@@ -307,13 +344,13 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
 
       // Create booking record
       const bookingsService = new BookingsClientService()
-      await bookingsService.createBooking({
+      const newBooking = await bookingsService.createBooking({
         user_id: user.id!,
         class_id: selectedClassData.id,
         student_id: studentInfo.id,
         payment_amount: selectedClassData.price,
-        payment_method: 'credit_card',
-        notes: `Booking for ${selectedClassData.title} on ${formatDate(selectedClassData.date)} at ${formatTime(selectedClassData.time)}`
+        payment_method: 'stripe',
+        notes: `Booking for ${selectedClassData.title} on ${formatDate(selectedClassData.date)} at ${formatTime(selectedClassData.time)}. Payment Intent: ${paymentIntentId}`
       })
 
       // Update enrolled count in the class
@@ -335,7 +372,7 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
             classDate: selectedClassData.date,
             classTime: selectedClassData.time,
             classPrice: selectedClassData.price,
-            bookingId: `BK-${Date.now()}` // Generate a simple booking ID
+            bookingId: newBooking.id || `BK-${Date.now()}`
           })
         })
 
@@ -354,7 +391,7 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
       setAuthStep('confirmation')
     } catch (error) {
       console.error('Payment/booking error:', error)
-      setPaymentError('Payment failed. Please try again.')
+      setPaymentError('Booking creation failed. Please contact support.')
     }
     
     setPaymentLoading(false)
@@ -374,8 +411,6 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
       onClose()
     }
   }
-
-  const selectedClassData = classes.find(c => c.id === selectedClassId)
 
   const renderClassSelection = () => (
     <div className="space-y-6">
@@ -870,203 +905,128 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     </div>
   )
 
-  const renderPaymentForm = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
-      {/* Left Column - Class Details */}
-      <div className="flex flex-col h-full">
-        <Card className="border-slate-200 shadow-sm flex flex-col h-full">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <div className="bg-cocinarte-navy/10 p-2 rounded-lg">
-                <ChefHat className="h-5 w-5 text-cocinarte-navy" />
-              </div>
-              Class Details
-            </CardTitle>
-            <CardDescription className="text-slate-600">
-              Review your selected cooking class
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6 flex-1">
-            {selectedClassData && (
-              <>
-                <div className="space-y-4">
-                  <div>
-                    <span className="text-sm font-semibold text-slate-600">Class Name</span>
-                    <p className="text-lg font-bold text-slate-800 mt-1">{selectedClassData.title}</p>
+  const renderPaymentForm = () => {
+    const options = {
+      clientSecret,
+      appearance: {
+        theme: 'stripe' as const,
+        variables: {
+          colorPrimary: '#1E3A8A',
+        },
+      },
+    }
+
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+        {/* Left Column - Class Details */}
+        <div className="flex flex-col h-full">
+          <Card className="border-slate-200 shadow-sm flex flex-col h-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <div className="bg-cocinarte-navy/10 p-2 rounded-lg">
+                  <ChefHat className="h-5 w-5 text-cocinarte-navy" />
+                </div>
+                Class Details
+              </CardTitle>
+              <CardDescription className="text-slate-600">
+                Review your selected cooking class
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 flex-1">
+              {selectedClassData && (
+                <>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-sm font-semibold text-slate-600">Class Name</span>
+                      <p className="text-lg font-bold text-slate-800 mt-1">{selectedClassData.title}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <div className="bg-cocinarte-orange/20 p-2 rounded-lg">
+                          <Calendar className="h-4 w-4 text-cocinarte-orange" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-slate-600">Date</span>
+                          <p className="font-semibold text-slate-800">{formatDate(selectedClassData.date)}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <div className="bg-cocinarte-orange/20 p-2 rounded-lg">
+                          <Clock className="h-4 w-4 text-cocinarte-orange" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-slate-600">Time</span>
+                          <p className="font-semibold text-slate-800">{formatTime(selectedClassData.time)}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <div className="bg-cocinarte-navy/20 p-2 rounded-lg">
+                          <Clock className="h-4 w-4 text-cocinarte-navy" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-slate-600">Duration</span>
+                          <p className="font-semibold text-slate-800">{selectedClassData.classDuration} minutes</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="bg-cocinarte-orange/20 p-2 rounded-lg">
-                        <Calendar className="h-4 w-4 text-cocinarte-orange" />
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-slate-600">Date</span>
-                        <p className="font-semibold text-slate-800">{formatDate(selectedClassData.date)}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="bg-cocinarte-orange/20 p-2 rounded-lg">
-                        <Clock className="h-4 w-4 text-cocinarte-orange" />
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-slate-600">Time</span>
-                        <p className="font-semibold text-slate-800">{formatTime(selectedClassData.time)}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="bg-cocinarte-navy/20 p-2 rounded-lg">
-                        <Clock className="h-4 w-4 text-cocinarte-navy" />
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-slate-600">Duration</span>
-                        <p className="font-semibold text-slate-800">{selectedClassData.classDuration} minutes</p>
-                      </div>
+                  <div className="border-t border-slate-200 pt-4 mt-auto">
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-semibold text-slate-700">Total Amount</span>
+                      <span className="text-3xl font-bold text-cocinarte-navy">${selectedClassData.price}</span>
                     </div>
                   </div>
-                </div>
-                
-                <div className="border-t border-slate-200 pt-4 mt-auto">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold text-slate-700">Total Amount</span>
-                    <span className="text-3xl font-bold text-cocinarte-navy">${selectedClassData.price}</span>
-                  </div>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Right Column - Payment Form */}
-      <div className="flex flex-col h-full">
-        <Card className="border-slate-200 shadow-sm flex flex-col h-full">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-              <div className="bg-cocinarte-navy/10 p-2 rounded-lg">
-                <CreditCard className="h-5 w-5 text-cocinarte-navy" />
-              </div>
-              Payment Information
-            </CardTitle>
-            <CardDescription className="text-slate-600">
-              Enter your payment details to complete the booking
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col flex-1">
-            <form onSubmit={handlePayment} className="space-y-6 flex flex-col flex-1">
-              <div className="space-y-6 flex-1">
-                <div className="space-y-2">
-                  <Label htmlFor="card-name" className="text-sm font-semibold text-slate-700">Cardholder Name *</Label>
-                  <Input
-                    id="card-name"
-                    type="text"
-                    placeholder="Enter cardholder name"
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                    className="h-12"
-                    required
+        {/* Right Column - Payment Form */}
+        <div className="flex flex-col h-full">
+          <Card className="border-slate-200 shadow-sm flex flex-col h-full">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <div className="bg-cocinarte-navy/10 p-2 rounded-lg">
+                  <CreditCard className="h-5 w-5 text-cocinarte-navy" />
+                </div>
+                Payment Information
+              </CardTitle>
+              <CardDescription className="text-slate-600">
+                Securely pay with Stripe
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1">
+              {!clientSecret ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cocinarte-navy"></div>
+                  <span className="ml-2 text-slate-600">Loading payment form...</span>
+                </div>
+              ) : (
+                <Elements stripe={stripePromise} options={options}>
+                  <StripePaymentForm
+                    amount={selectedClassData?.price || 0}
+                    onSuccess={handlePaymentSuccess}
+                    onCancel={() => setAuthStep('class-selection')}
+                    loading={paymentLoading}
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="card-number" className="text-sm font-semibold text-slate-700">Card Number *</Label>
-                  <Input
-                    id="card-number"
-                    type="text"
-                    placeholder="1234 5678 9012 3456"
-                    value={cardNumber}
-                    onChange={(e) => {
-                      const digitsOnly = e.target.value.replace(/\s/g, '')
-                      if (digitsOnly.length <= 16) {
-                        const value = digitsOnly.replace(/(.{4})/g, '$1 ').trim()
-                        setCardNumber(value)
-                      }
-                    }}
-                    className="h-12"
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiry-date" className="text-sm font-semibold text-slate-700">Expiry Date *</Label>
-                    <Input
-                      id="expiry-date"
-                      type="text"
-                      placeholder="MM/YY"
-                      value={expiryDate}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '')
-                        if (value.length <= 4) {
-                          if (value.length >= 2) {
-                            setExpiryDate(value.substring(0, 2) + '/' + value.substring(2, 4))
-                          } else {
-                            setExpiryDate(value)
-                          }
-                        }
-                      }}
-                      className="h-12"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cvv" className="text-sm font-semibold text-slate-700">CVV *</Label>
-                    <Input
-                      id="cvv"
-                      type="text"
-                      placeholder="123"
-                      value={cvv}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '')
-                        if (value.length <= 3) {
-                          setCvv(value)
-                        }
-                      }}
-                      className="h-12"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {paymentError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{paymentError}</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-slate-200 mt-auto">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setAuthStep('class-selection')}
-                  className="flex-1 h-12"
-                >
-                  Back to Classes
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={paymentLoading}
-                  className="flex-1 h-12 bg-cocinarte-navy hover:bg-cocinarte-navy/90 text-white"
-                >
-                  {paymentLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      Processing...
-                    </div>
-                  ) : (
-                    `Pay $${selectedClassData?.price || 0}`
-                  )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                </Elements>
+              )}
+              {paymentError && !clientSecret && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{paymentError}</AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   const renderConfirmation = () => (
     <div className="space-y-6">

@@ -6,7 +6,7 @@ export interface Booking {
   booking_date: string; // ISO date string
   payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
   payment_amount: number;
-  payment_method: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer';
+  payment_method: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'stripe';
   booking_status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   notes?: string;
   created_at: string;
@@ -18,7 +18,7 @@ export interface CreateBookingData {
   class_id: string;
   student_id: string;
   payment_amount: number;
-  payment_method?: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer';
+  payment_method?: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'stripe';
   notes?: string;
 }
 
