@@ -909,34 +909,9 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     const options = {
       clientSecret,
       appearance: {
-        theme: 'flat' as const,
+        theme: 'stripe' as const,
         variables: {
-          colorPrimary: '#1E3A8A', // cocinarte navy
-          colorPrimaryText: '#ffffff',
-          colorText: '#0f172a', // slate-900
-          colorTextSecondary: '#475569', // slate-600
-          colorDanger: '#DC2626',
-          colorBackground: '#ffffff',
-          borderRadius: '12px',
-          fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial",
-          spacingUnit: '8px',
-        },
-        rules: {
-          '.Tab': { borderRadius: '10px' },
-          '.Tab:hover': { backgroundColor: '#f8fafc' },
-          '.Tab--selected': { color: '#1E3A8A', borderColor: '#1E3A8A' },
-          '.Label': { color: '#475569', fontWeight: '600' },
-          '.Input': { border: '1px solid #e5e7eb', boxShadow: 'none' },
-          '.Input--invalid': { borderColor: '#DC2626' },
-          '.Input:focus': { borderColor: '#1E3A8A', boxShadow: '0 0 0 3px rgba(30,58,138,0.12)' },
-          '.Error': { color: '#DC2626' },
-          '.PrimaryButton': {
-            backgroundColor: '#1E3A8A',
-            color: '#ffffff',
-            borderRadius: '10px',
-          },
-          '.PrimaryButton:hover': { backgroundColor: '#1b3379' },
-          '.Link': { color: '#F0614F' },
+          colorPrimary: '#1E3A8A',
         },
       },
     }
