@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     siteName: 'Cocinarte',
     images: [
       {
-        url: '/cocinarte/cocinarteLogo.png',
+        url: '/hero.png',
         width: 1200,
         height: 630,
         alt: 'Cocinarte - Cooking Adventures for Kids & Families',
@@ -105,7 +105,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Cocinarte - Cooking Adventures for Kids & Families",
     description: "A cooking program designed for kids and families to explore Latin flavors while learning hands-on cooking skills. Fun, interactive, and age-appropriate classes.",
-    images: ['/cocinarte/cocinarteLogo.png'],
+    images: ['/hero.png'],
   },
   robots: {
     index: true,
@@ -179,7 +179,7 @@ export default function RootLayout({
               "name": "Cocinarte",
               "description": "A cooking program designed for kids and families to explore Latin flavors while learning hands-on cooking skills. Fun, interactive, and age-appropriate classes.",
               "url": "https://cocinarte.com",
-              "logo": "https://cocinarte.com/cocinarte/cocinarteLogo.png",
+              "logo": "https://cocinarte.com/hero.png",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "770 NE Rogahn Street",
