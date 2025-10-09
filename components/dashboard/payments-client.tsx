@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { DollarSign, Edit, Trash2, CreditCard, Calendar } from 'lucide-react'
+import { DollarSign, CreditCard, Calendar } from 'lucide-react'
 import { BookingsClientService } from '@/lib/supabase/bookings-client'
 
 interface BookingRow {
@@ -48,29 +48,6 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
     }
   }
 
-  const markAsRefunded = async (id: string) => {
-    setBusyId(id)
-    try {
-      const api = new BookingsClientService()
-      await api.updateBooking({ id, payment_status: 'refunded' })
-      setBookings(prev => prev.map(b => (b.id === id ? { ...b, payment_status: 'refunded' } : b)))
-      await refreshAfter()
-    } finally {
-      setBusyId(null)
-    }
-  }
-
-  const deleteBooking = async (id: string) => {
-    setBusyId(id)
-    try {
-      const api = new BookingsClientService()
-      await api.deleteBooking(id)
-      setBookings(prev => prev.filter(b => b.id !== id))
-    } finally {
-      setBusyId(null)
-    }
-  }
-
   const handleQuickRecordPayment = async () => {
     // Mark the first pending booking as paid (simple quick action)
     setGlobalBusy(true)
@@ -78,18 +55,6 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
       const pending = bookings.find(b => b.payment_status === 'pending')
       if (pending) {
         await markAsPaid(pending.id)
-      }
-    } finally {
-      setGlobalBusy(false)
-    }
-  }
-
-  const handleQuickRefund = async () => {
-    setGlobalBusy(true)
-    try {
-      const completed = bookings.find(b => b.payment_status === 'completed')
-      if (completed) {
-        await markAsRefunded(completed.id)
       }
     } finally {
       setGlobalBusy(false)
@@ -136,14 +101,6 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
                         <CreditCard className="h-3 w-3 mr-1" /> Mark paid
                       </Button>
                     )}
-                    {b.payment_status === 'completed' && (
-                      <Button size="sm" variant="outline" onClick={() => markAsRefunded(b.id)} disabled={busyId === b.id}>
-                        Refund
-                      </Button>
-                    )}
-                    <Button size="sm" variant="outline" onClick={() => deleteBooking(b.id)} disabled={busyId === b.id}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
                   </div>
                 </div>
               )
@@ -168,10 +125,6 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
             <Button variant="outline" className="h-20 flex-col space-y-2" onClick={handleQuickRecordPayment} disabled={globalBusy}>
               <CreditCard className="h-6 w-6" />
               <span>Record Payment</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex-col space-y-2" onClick={handleQuickRefund} disabled={globalBusy}>
-              <DollarSign className="h-6 w-6" />
-              <span>Process Refund</span>
             </Button>
             <Button variant="outline" className="h-20 flex-col space-y-2" disabled>
               <Calendar className="h-6 w-6" />
