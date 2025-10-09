@@ -19,15 +19,17 @@ interface BookingPopupProps {
   isOpen: boolean
   onClose: () => void
   selectedClass?: Clase
+  initialStep?: 'class-selection' | 'login' | 'signup' | 'payment' | 'confirmation'
+  initialSelectedClassId?: string
 }
 
-export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass }: BookingPopupProps) {
+export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, initialStep, initialSelectedClassId }: BookingPopupProps) {
   const [classes, setClasses] = useState<Clase[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(selectedClass?.id || null)
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(initialSelectedClassId || selectedClass?.id || null)
   
   // Authentication states
-  const [authStep, setAuthStep] = useState<'class-selection' | 'login' | 'signup' | 'payment' | 'confirmation'>('class-selection')
+  const [authStep, setAuthStep] = useState<'class-selection' | 'login' | 'signup' | 'payment' | 'confirmation'>(initialStep || 'class-selection')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -66,6 +68,9 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass }
     }
 
     if (isOpen) {
+      // Sync initial values when opened
+      if (initialSelectedClassId) setSelectedClassId(initialSelectedClassId)
+      if (initialStep) setAuthStep(initialStep)
       fetchClasses()
     }
   }, [isOpen])
