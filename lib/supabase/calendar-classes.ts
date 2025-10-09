@@ -7,6 +7,7 @@ export interface CalendarClass {
   date: Date;
   time: string;
   type: "mini-chef" | "mom-me";
+  class_type?: string;
   price: number;
   description?: string;
   minStudents: number;
@@ -86,6 +87,7 @@ export class CalendarClassesService {
       date: new Date(clase.date + 'T00:00:00'),
       time: formattedTime,
       type: type as "mini-chef" | "mom-me",
+      class_type: clase.class_type,
       price: clase.price,
       description: clase.description,
       minStudents: clase.minStudents,

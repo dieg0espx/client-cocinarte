@@ -1110,9 +1110,16 @@ export default function CocinarteMonthlyCalendar() {
               ✕
             </button>
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 pr-8">
-              <Badge className={`${selectedClass ? getTypeColor(selectedClass.type, selectedClass.price) : ''} font-bold w-fit`}>
-                {selectedClass ? getTypeLabel(selectedClass.type) : ''}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className={`${selectedClass ? getTypeColor(selectedClass.type, selectedClass.price) : ''} font-bold w-fit`}>
+                  {selectedClass ? getTypeLabel(selectedClass.type) : ''}
+                </Badge>
+                {selectedClass?.class_type && (
+                  <Badge className="bg-cocinarte-navy text-cocinarte-white font-bold w-fit">
+                    {selectedClass.class_type}
+                  </Badge>
+                )}
+              </div>
               <h2 className="text-lg sm:text-xl lg:text-2xl text-slate leading-tight font-bold">
                 {selectedClass?.title}
               </h2>

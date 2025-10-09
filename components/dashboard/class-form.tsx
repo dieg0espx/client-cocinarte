@@ -6,6 +6,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -39,6 +46,7 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
         enrolled: editingClass.enrolled || 0,
         price: editingClass.price,
         classDuration: editingClass.classDuration,
+        class_type: editingClass.class_type,
       }
     }
     return {
@@ -50,6 +58,7 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
       maxStudents: 8,
       price: 0,
       classDuration: 60,
+      class_type: undefined,
     }
   }
 
@@ -133,6 +142,23 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
                 placeholder="Describe what students will learn..."
                 rows={3}
               />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="class_type">Class Type</Label>
+              <Select
+                value={formData.class_type || ''}
+                onValueChange={(value) => handleChange('class_type', value as 'Mini Chefcitos' | 'Chefcitos Together' | 'Cocina Creativa')}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a class type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mini Chefcitos">Mini Chefcitos</SelectItem>
+                  <SelectItem value="Chefcitos Together">Chefcitos Together</SelectItem>
+                  <SelectItem value="Cocina Creativa">Cocina Creativa</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

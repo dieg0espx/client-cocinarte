@@ -9,9 +9,7 @@ export interface Clase {
   enrolled: number; // number of students currently enrolled
   price: number;
   classDuration: number; // duration in minutes
-  class_type?: 'mini-chef' | 'mom-me'; // type of cooking class
-  menu?: string[]; // array of menu items
-  image_url?: string; // optional image URL
+  class_type?: 'Mini Chefcitos' | 'Chefcitos Together' | 'Cocina Creativa'; // type of cooking class
   created_at: string;
   updated_at: string;
 }
@@ -44,9 +42,7 @@ export interface CreateClaseData {
   enrolled?: number; // optional, defaults to 0
   price: number;
   classDuration: number;
-  class_type?: 'mini-chef' | 'mom-me';
-  menu?: string[];
-  image_url?: string;
+  class_type?: 'Mini Chefcitos' | 'Chefcitos Together' | 'Cocina Creativa';
 }
 
 export interface UpdateClaseData extends Partial<CreateClaseData> {
