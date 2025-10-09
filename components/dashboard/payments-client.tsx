@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { DollarSign, CreditCard, Calendar } from 'lucide-react'
 import { BookingsClientService } from '@/lib/supabase/bookings-client'
+import { BookingDetailsPopup } from './booking-details-popup'
+import { BookingWithDetails } from '@/lib/types/bookings'
 
 interface BookingRow {
   id: string
@@ -28,18 +29,35 @@ function getParentName(std: BookingRow['student']): string | undefined {
 }
 
 export default function PaymentsClient({ initialBookings }: { initialBookings: BookingRow[] }) {
-  const router = useRouter()
   const [bookings, setBookings] = useState<BookingRow[]>(initialBookings)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [globalBusy, setGlobalBusy] = useState(false)
+  const [selectedBooking, setSelectedBooking] = useState<BookingWithDetails | null>(null)
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [loadingBooking, setLoadingBooking] = useState(false)
   const currency = (v: number) => `$${(v || 0).toFixed(2)}`
 
   const refreshAfter = async () => {
     // Optimistic UI already applied; keep as-is for now.
   }
 
-  const handleRowClick = (id: string) => {
-    router.push(`/dashboard/bookings?id=${id}`)
+  const handleRowClick = async (id: string) => {
+    setLoadingBooking(true)
+    try {
+      const api = new BookingsClientService()
+      const booking = await api.getBookingById(id)
+      setSelectedBooking(booking)
+      setIsPopupOpen(true)
+    } catch (error) {
+      console.error('Error loading booking details:', error)
+    } finally {
+      setLoadingBooking(false)
+    }
+  }
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false)
+    setSelectedBooking(null)
   }
 
   const markAsPaid = async (id: string, e: React.MouseEvent) => {
@@ -70,6 +88,12 @@ export default function PaymentsClient({ initialBookings }: { initialBookings: B
 
   return (
     <>
+      <BookingDetailsPopup 
+        booking={selectedBooking}
+        isOpen={isPopupOpen}
+        onClose={handleClosePopup}
+      />
+
       {/* Recent Payments */}
       <Card>
         <CardHeader>
