@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Email content
     const mailOptions = {
       from: process.env.SMTP_FROM,
-      to: process.env.CONTACT_EMAIL,
+      to: ['diego@comcreate.org', process.env.CONTACT_EMAIL],
       subject: `Contact Form Submission: ${subject || 'No Subject'}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

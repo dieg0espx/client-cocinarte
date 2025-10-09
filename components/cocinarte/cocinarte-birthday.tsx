@@ -6,9 +6,106 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { useState } from "react"
 import Image from "next/image"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CocinarteBirthday() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
+  
+  const [formData, setFormData] = useState({
+    numberOfChildren: '',
+    package: '',
+    parentName: '',
+    phone: '',
+    email: '',
+    childNameAge: '',
+    specialRequests: ''
+  })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    console.log('Birthday form submitted!')
+    console.log('Form data:', formData)
+    console.log('Selected date:', selectedDate)
+    
+    if (!selectedDate) {
+      console.log('Date validation failed')
+      toast({
+        title: "Date Required",
+        description: "Please select a preferred date for your party.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!formData.package) {
+      console.log('Package validation failed')
+      toast({
+        title: "Package Required",
+        description: "Please select a party package.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    console.log('All validations passed, submitting...')
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/birthday-party', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          preferredDate: selectedDate.toISOString(),
+          ...formData
+        })
+      })
+
+      console.log('Response status:', response.status)
+      const data = await response.json()
+      console.log('Response data:', data)
+
+      if (response.ok) {
+        console.log('Success! Showing toast...')
+        toast({
+          title: "🎉 Request Submitted!",
+          description: "We've received your party request and will contact you within 24 hours!",
+          duration: 5000
+        })
+        
+        // Reset form
+        setSelectedDate(null)
+        setFormData({
+          numberOfChildren: '',
+          package: '',
+          parentName: '',
+          phone: '',
+          email: '',
+          childNameAge: '',
+          specialRequests: ''
+        })
+      } else {
+        throw new Error(data.error || 'Failed to submit request')
+      }
+    } catch (error) {
+      console.error('Error submitting party request:', error)
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your request. Please try again or contact us directly.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <section id="birthday-parties" className="py-20 relative">
@@ -101,7 +198,7 @@ export default function CocinarteBirthday() {
         {/* Birthday Party Request Form */}
         <div className="mt-16 bg-cocinarte-white rounded-2xl shadow-lg p-6">
           <h3 className="text-2xl font-bold text-center text-slate mb-6">Request Your Party</h3>
-          <form className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -133,7 +230,10 @@ export default function CocinarteBirthday() {
                   Number of Children *
                 </label>
                 <input 
-                  type="number" 
+                  type="number"
+                  name="numberOfChildren"
+                  value={formData.numberOfChildren}
+                  onChange={handleInputChange}
                   min="1" 
                   max="20" 
                   required
@@ -152,12 +252,15 @@ export default function CocinarteBirthday() {
                   <input 
                     type="radio" 
                     name="package" 
-                    value="mini-party" 
+                    value="mini-party"
+                    checked={formData.package === 'mini-party'}
+                    onChange={handleInputChange}
+                    required
                     className="mr-2 text-cocinarte-orange focus:ring-cocinarte-orange"
                   />
                   <div className="flex-1">
                     <div className="font-semibold text-slate text-sm">Mini Fiesta</div>
-                    <div className="text-xs text-slate-medium">$350 • 8 kids • 1.5 hours</div>
+                    <div className="text-xs text-slate-medium">$350 • 8 kids • 2 hours</div>
                   </div>
                 </label>
                 
@@ -165,7 +268,10 @@ export default function CocinarteBirthday() {
                   <input 
                     type="radio" 
                     name="package" 
-                    value="deluxe-party" 
+                    value="deluxe-party"
+                    checked={formData.package === 'deluxe-party'}
+                    onChange={handleInputChange}
+                    required
                     className="mr-2 text-cocinarte-orange focus:ring-cocinarte-orange"
                   />
                   <div className="flex-1">
@@ -178,7 +284,10 @@ export default function CocinarteBirthday() {
                   <input 
                     type="radio" 
                     name="package" 
-                    value="premium-party" 
+                    value="premium-party"
+                    checked={formData.package === 'premium-party'}
+                    onChange={handleInputChange}
+                    required
                     className="mr-2 text-cocinarte-orange focus:ring-cocinarte-orange"
                   />
                   <div className="flex-1">
@@ -195,7 +304,10 @@ export default function CocinarteBirthday() {
                   Parent/Guardian Name *
                 </label>
                 <input 
-                  type="text" 
+                  type="text"
+                  name="parentName"
+                  value={formData.parentName}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border-2 border-cocinarte-blue/30 rounded-xl focus:ring-2 focus:ring-cocinarte-orange focus:border-cocinarte-orange transition-all duration-200 text-sm bg-cocinarte-blue/5 hover:bg-cocinarte-blue/10"
                   placeholder="Your full name"
@@ -206,7 +318,10 @@ export default function CocinarteBirthday() {
                   Phone Number *
                 </label>
                 <input 
-                  type="tel" 
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border-2 border-cocinarte-blue/30 rounded-xl focus:ring-2 focus:ring-cocinarte-orange focus:border-cocinarte-orange transition-all duration-200 text-sm bg-cocinarte-blue/5 hover:bg-cocinarte-blue/10"
                   placeholder="(503) 123-4567"
@@ -220,7 +335,10 @@ export default function CocinarteBirthday() {
                   Email Address *
                 </label>
                 <input 
-                  type="email" 
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border-2 border-cocinarte-blue/30 rounded-xl focus:ring-2 focus:ring-cocinarte-orange focus:border-cocinarte-orange transition-all duration-200 text-sm bg-cocinarte-blue/5 hover:bg-cocinarte-blue/10"
                   placeholder="your.email@example.com"
@@ -231,7 +349,10 @@ export default function CocinarteBirthday() {
                   Birthday Child's Name & Age
                 </label>
                 <input 
-                  type="text" 
+                  type="text"
+                  name="childNameAge"
+                  value={formData.childNameAge}
+                  onChange={handleInputChange}
                   className="w-full px-4 py-3 border-2 border-cocinarte-blue/30 rounded-xl focus:ring-2 focus:ring-cocinarte-orange focus:border-cocinarte-orange transition-all duration-200 text-sm bg-cocinarte-blue/5 hover:bg-cocinarte-blue/10"
                   placeholder="e.g., Maria, age 8"
                 />
@@ -242,7 +363,10 @@ export default function CocinarteBirthday() {
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Special Requests or Dietary Restrictions
               </label>
-              <textarea 
+              <textarea
+                name="specialRequests"
+                value={formData.specialRequests}
+                onChange={handleInputChange}
                 rows={2}
                 className="w-full px-4 py-3 border-2 border-cocinarte-blue/30 rounded-xl focus:ring-2 focus:ring-cocinarte-orange focus:border-cocinarte-orange transition-all duration-200 text-sm bg-cocinarte-blue/5 hover:bg-cocinarte-blue/10 resize-none"
                 placeholder="Any allergies, special themes, or requests..."
@@ -252,9 +376,10 @@ export default function CocinarteBirthday() {
           <div className="text-center">
               <Button 
                 type="submit"
-                className="bg-cocinarte-orange hover:bg-amber text-cocinarte-white font-bold px-6 py-3 text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+                disabled={isSubmitting}
+                className="bg-cocinarte-orange hover:bg-amber text-cocinarte-white font-bold px-6 py-3 text-base rounded-full shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Party Request
+                {isSubmitting ? 'Submitting...' : 'Submit Party Request'}
               </Button>
               <p className="text-xs text-slate-medium mt-3">
                 We'll contact you within 24 hours to confirm availability!
