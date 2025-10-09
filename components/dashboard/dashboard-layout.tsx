@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   BookOpen,
-  Home,
   DollarSign,
   CalendarDays,
 } from "lucide-react"
@@ -56,14 +55,6 @@ const navigationItems = [
   },
 ]
 
-const externalLinks = [
-  {
-    title: "Main Site",
-    url: "/",
-    icon: Home,
-  },
-]
-
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
@@ -91,28 +82,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navigationItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === item.url}
-                        tooltip={item.title}
-                      >
-                        <Link href={item.url}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>External</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {externalLinks.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
