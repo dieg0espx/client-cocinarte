@@ -10,6 +10,7 @@ interface FlipCardProps {
   imageSrc: string
   videoSrc?: string
   videoPosition?: string
+  imagePosition?: string
   detailedDescription?: string
   learningOutcomes?: string[]
 }
@@ -21,6 +22,7 @@ export default function FlipCard({
   imageSrc,
   videoSrc,
   videoPosition = "center 20%",
+  imagePosition = "center",
   detailedDescription,
   learningOutcomes = []
 }: FlipCardProps) {
@@ -89,6 +91,7 @@ export default function FlipCard({
                 alt={title}
                 fill
                 className="object-cover"
+                style={{ objectPosition: imagePosition }}
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

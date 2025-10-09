@@ -51,6 +51,7 @@ export default function CocinarteAbout() {
             description="Explore authentic Latin American cuisine"
             category="Culture"
             imageSrc="/cocinarte/cocinarte3.jpeg"
+            imagePosition="center top"
             detailedDescription="Explore authentic Latin American cuisine and discover new flavors, ingredients, and cooking techniques. Each class introduces children to the rich culinary traditions of Latin America."
             learningOutcomes={[
               "Discover traditional Latin American ingredients and spices",
