@@ -78,16 +78,16 @@ export function DashboardStatsFallback({ userId }: DashboardStatsProps) {
 
   if (loading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {[1, 2, 3, 4, 5].map((i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-3 sm:h-4 w-16 sm:w-20 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-3 w-3 sm:h-4 sm:w-4 bg-gray-200 rounded animate-pulse"></div>
             </CardHeader>
             <CardContent>
-              <div className="h-8 w-12 bg-gray-200 rounded animate-pulse mb-2"></div>
-              <div className="h-3 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 sm:h-8 w-8 sm:w-12 bg-gray-200 rounded animate-pulse mb-1 sm:mb-2"></div>
+              <div className="h-2 sm:h-3 w-16 sm:w-24 bg-gray-200 rounded animate-pulse"></div>
             </CardContent>
           </Card>
         ))}
@@ -97,14 +97,14 @@ export function DashboardStatsFallback({ userId }: DashboardStatsProps) {
 
   if (error) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <Card className="col-span-full">
           <CardHeader>
-            <CardTitle className="text-red-600">Database Setup Required</CardTitle>
+            <CardTitle className="text-red-600 text-sm sm:text-base">Database Setup Required</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-red-600 mb-4">{error}</p>
-            <div className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-red-600 mb-3 sm:mb-4">{error}</p>
+            <div className="text-xs sm:text-sm text-muted-foreground">
               <p className="font-medium mb-2">To fix this issue:</p>
               <ol className="list-decimal list-inside space-y-1">
                 <li>Run the database migration script</li>
@@ -119,15 +119,15 @@ export function DashboardStatsFallback({ userId }: DashboardStatsProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Cocinarte Students</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Cocinarte Students</CardTitle>
+          <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.students}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-xl sm:text-2xl font-bold">{stats.students}</div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             Active cooking students
           </p>
         </CardContent>
@@ -135,12 +135,12 @@ export function DashboardStatsFallback({ userId }: DashboardStatsProps) {
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Cooking Classes</CardTitle>
-          <BookOpen className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Cooking Classes</CardTitle>
+          <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.classes}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-xl sm:text-2xl font-bold">{stats.classes}</div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             Active cooking sessions
           </p>
         </CardContent>
@@ -148,12 +148,12 @@ export function DashboardStatsFallback({ userId }: DashboardStatsProps) {
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Total Bookings</CardTitle>
+          <CalendarDays className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.bookings}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-xl sm:text-2xl font-bold">{stats.bookings}</div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             Cooking class bookings
           </p>
         </CardContent>
@@ -161,12 +161,12 @@ export function DashboardStatsFallback({ userId }: DashboardStatsProps) {
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Total Revenue</CardTitle>
+          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${stats.revenue.toFixed(2)}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-xl sm:text-2xl font-bold">${stats.revenue.toFixed(2)}</div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             Cocinarte income
           </p>
         </CardContent>
@@ -174,12 +174,12 @@ export function DashboardStatsFallback({ userId }: DashboardStatsProps) {
       
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Recipe Mastery</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-xs sm:text-sm font-medium">Recipe Mastery</CardTitle>
+          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.recipeMastery}%</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-xl sm:text-2xl font-bold">{stats.recipeMastery}%</div>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
             Recipe completion rate
           </p>
         </CardContent>
