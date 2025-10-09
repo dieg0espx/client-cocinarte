@@ -280,16 +280,16 @@ export function BookingsTable({ userId }: BookingsTableProps) {
         </div>
 
         {/* Table */}
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Class & Student</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="min-w-[200px]">Class & Student</TableHead>
+                <TableHead className="min-w-[150px]">Date & Time</TableHead>
+                <TableHead className="min-w-[120px]">Status</TableHead>
+                <TableHead className="min-w-[120px]">Payment</TableHead>
+                <TableHead className="min-w-[100px]">Amount</TableHead>
+                <TableHead className="min-w-[80px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -310,46 +310,46 @@ export function BookingsTable({ userId }: BookingsTableProps) {
                 </TableRow>
               ) : (
                 filteredBookings.map((booking) => (
-                  <TableRow key={booking.id}>
-                    <TableCell>
+                  <TableRow key={booking.id} className="hover:bg-muted/50">
+                    <TableCell className="min-w-[200px]">
                       <div className="space-y-1">
-                        <p className="font-medium">{booking.class?.title || 'Unknown Class'}</p>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <User className="h-4 w-4 mr-1" />
+                        <p className="font-medium text-sm">{booking.class?.title || 'Unknown Class'}</p>
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <User className="h-3 w-3 mr-1" />
                           {booking.student?.child_name || 'Unknown Student'}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          {booking.student?.parent_name}
+                          Parent: {booking.student?.parent_name}
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-[150px]">
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm">
-                          <Calendar className="h-4 w-4 mr-1" />
+                        <div className="flex items-center text-xs">
+                          <Calendar className="h-3 w-3 mr-1" />
                           {booking.class?.date && format(new Date(booking.class.date), 'MMM dd, yyyy')}
                         </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4 mr-1" />
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3 mr-1" />
                           {booking.class?.time}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(booking.booking_status)}>
+                    <TableCell className="min-w-[120px]">
+                      <Badge className={`${getStatusColor(booking.booking_status)} text-xs`}>
                         {getStatusIcon(booking.booking_status)}
                         <span className="ml-1 capitalize">{booking.booking_status}</span>
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <Badge className={getPaymentStatusColor(booking.payment_status)}>
+                    <TableCell className="min-w-[120px]">
+                      <Badge className={`${getPaymentStatusColor(booking.payment_status)} text-xs`}>
                         {booking.payment_status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-[100px]">
                       <div className="flex items-center">
-                        <DollarSign className="h-4 w-4 mr-1 text-green-600" />
-                        <span className="font-medium">${booking.payment_amount}</span>
+                        <DollarSign className="h-3 w-3 mr-1 text-green-600" />
+                        <span className="font-medium text-sm">${booking.payment_amount}</span>
                       </div>
                     </TableCell>
                     <TableCell>
