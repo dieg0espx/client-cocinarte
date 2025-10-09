@@ -34,11 +34,15 @@ export function RecentActivityFallback({ userId }: RecentActivityProps) {
       setLoading(true)
       const supabase = createClient()
       
-      // Try to fetch data without user_id filter first (fallback approach)
+      // Fetch all recent activities from database
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
-          *,
+          id,
+          payment_status,
+          payment_amount,
+          created_at,
+          updated_at,
           class:clases(
             title,
             date
@@ -49,78 +53,49 @@ export function RecentActivityFallback({ userId }: RecentActivityProps) {
           )
         `)
         .order('created_at', { ascending: false })
-        .limit(10)
+        .limit(20)
 
-      const { data: students, error: studentsError } = await supabase
-        .from('students')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      const { data: classes, error: classesError } = await supabase
-        .from('clases')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5)
-
-      if (bookingsError || studentsError || classesError) {
-        console.error('Database errors:', { bookingsError, studentsError, classesError })
-        setError('Database connection issue. Please check your database setup.')
+      if (bookingsError) {
+        console.error('Database error:', bookingsError)
+        setError('Unable to load recent activity. Please check your database connection.')
         return
       }
 
       const activityItems: ActivityItem[] = []
 
-      // Add booking activities
+      // Process bookings into activities
       bookings?.forEach(booking => {
+        const studentName = Array.isArray(booking.student) 
+          ? (booking.student[0] as any)?.child_name 
+          : (booking.student as any)?.child_name || 'Student'
+        
+        const className = Array.isArray(booking.class) 
+          ? (booking.class[0] as any)?.title 
+          : (booking.class as any)?.title || 'Cooking Class'
+
+        // Add booking activity
         activityItems.push({
           id: `booking-${booking.id}`,
           type: 'booking',
-          title: 'New Cocinarte booking',
-          description: `${booking.student?.child_name || 'Student'} booked ${booking.class?.title || 'Cooking Class'}`,
+          title: 'New booking created',
+          description: `${studentName} booked ${className}`,
           timestamp: booking.created_at,
           icon: <Calendar className="h-4 w-4" />,
           color: 'bg-blue-100 text-blue-600'
         })
 
-        // Add payment activities for completed payments
+        // Add payment activity for completed payments
         if (booking.payment_status === 'completed') {
           activityItems.push({
             id: `payment-${booking.id}`,
             type: 'payment',
-            title: 'Cocinarte payment received',
-            description: `${booking.student?.child_name || 'Student'} paid $${booking.payment_amount} for ${booking.class?.title || 'Cooking Class'}`,
+            title: 'Payment completed',
+            description: `${studentName} paid $${booking.payment_amount} for ${className}`,
             timestamp: booking.updated_at,
             icon: <DollarSign className="h-4 w-4" />,
             color: 'bg-green-100 text-green-600'
           })
         }
-      })
-
-      // Add student activities
-      students?.forEach(student => {
-        activityItems.push({
-          id: `student-${student.id}`,
-          type: 'student',
-          title: 'New Cocinarte student enrolled',
-          description: `${student.child_name} joined the cooking program`,
-          timestamp: student.created_at,
-          icon: <Users className="h-4 w-4" />,
-          color: 'bg-purple-100 text-purple-600'
-        })
-      })
-
-      // Add class activities
-      classes?.forEach(clase => {
-        activityItems.push({
-          id: `class-${clase.id}`,
-          type: 'class',
-          title: 'New cooking class created',
-          description: `${clase.title} - ${clase.classType || 'Cooking Workshop'}`,
-          timestamp: clase.created_at,
-          icon: <ChefHat className="h-4 w-4" />,
-          color: 'bg-orange-100 text-orange-600'
-        })
       })
 
       // Sort by timestamp and take the most recent 6
