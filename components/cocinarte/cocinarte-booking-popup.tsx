@@ -72,8 +72,72 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
       if (initialSelectedClassId) setSelectedClassId(initialSelectedClassId)
       if (initialStep) setAuthStep(initialStep)
       fetchClasses()
+      
+      // Check for pending booking when popup opens
+      const pendingBooking = sessionStorage.getItem('pendingBooking')
+      if (pendingBooking && user) {
+        // If user is already logged in and there's a pending booking, restore it
+        try {
+          const bookingData = JSON.parse(pendingBooking)
+          setSelectedClassId(bookingData.classId)
+          setParentName(bookingData.parentName)
+          setChildName(bookingData.childName)
+          setPhone(bookingData.phone)
+          setAddress(bookingData.address)
+        } catch (error) {
+          console.error('Error parsing pending booking:', error)
+          sessionStorage.removeItem('pendingBooking')
+        }
+      }
     }
-  }, [isOpen])
+  }, [isOpen, initialSelectedClassId, initialStep, user])
+
+  // Handle post-signup flow - restore booking and proceed to payment
+  useEffect(() => {
+    const handlePostSignup = async () => {
+      // Check if user just authenticated and there's a pending booking
+      const pendingBooking = sessionStorage.getItem('pendingBooking')
+      
+      if (user && pendingBooking && isOpen) {
+        try {
+          const bookingData = JSON.parse(pendingBooking)
+          
+          // Restore the booking state
+          setSelectedClassId(bookingData.classId)
+          setParentName(bookingData.parentName)
+          setChildName(bookingData.childName)
+          setPhone(bookingData.phone)
+          setAddress(bookingData.address)
+          
+          // Create student record if it doesn't exist
+          const studentsService = new StudentsClientService()
+          const existingStudent = await studentsService.getStudentByEmail(user.email!)
+          
+          if (!existingStudent) {
+            await studentsService.createStudent({
+              parent_name: bookingData.parentName,
+              child_name: bookingData.childName,
+              email: user.email!,
+              phone: bookingData.phone,
+              address: bookingData.address
+            })
+          }
+          
+          // Clear the pending booking
+          sessionStorage.removeItem('pendingBooking')
+          
+          // Proceed to payment
+          setAuthStep('payment')
+          setAuthMessage('Account created successfully! Please complete your payment.')
+        } catch (error) {
+          console.error('Error restoring booking:', error)
+          setAuthError('Unable to restore booking. Please try again.')
+        }
+      }
+    }
+    
+    handlePostSignup()
+  }, [user, isOpen])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -151,54 +215,39 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     }
 
     try {
+      // Store booking intent in sessionStorage before signup
+      const bookingData = {
+        classId: selectedClassId,
+        parentName,
+        childName,
+        phone,
+        address,
+        email
+      }
+      sessionStorage.setItem('pendingBooking', JSON.stringify(bookingData))
+      
       const { error } = await signUp(email, password)
       
       if (error) {
         setAuthError(error.message)
-            } else {
-              // Create student record
-              const studentsService = new StudentsClientService()
-              const newStudent = await studentsService.createStudent({
-                parent_name: parentName,
-                child_name: childName,
-                email: email,
-                phone: phone,
-                address: address
-              })
-
-              setAuthMessage('Account and student profile created successfully!')
-              
-              // After successful signup, create booking and proceed
-              setTimeout(async () => {
-                try {
-                  const selectedClass = classes.find(c => c.id === selectedClassId)
-                  if (selectedClass && user) {
-                    // Create booking record
-                    const bookingsService = new BookingsClientService()
-                    await bookingsService.createBooking({
-                      user_id: user.id!,
-                      class_id: selectedClass.id,
-                      student_id: newStudent.id,
-                      payment_amount: selectedClass.price,
-                      payment_method: 'credit_card',
-                      notes: `Booking for ${selectedClass.title} on ${formatDate(selectedClass.date)} at ${formatTime(selectedClass.time)}`
-                    })
-
-                    // Update enrolled count in the class
-                    const clasesService = new ClasesClientService()
-                    await clasesService.updateClassEnrollment(selectedClass.id, 1)
-                    
-                    // Show confirmation
-                    setAuthStep('confirmation')
-                  }
-                } catch (error) {
-                  console.error('Booking creation error:', error)
-                  setAuthError('Account created but booking failed. Please try booking again.')
-                }
-              }, 2000)
-            }
+        // Clear pending booking on error
+        sessionStorage.removeItem('pendingBooking')
+      } else {
+        setAuthMessage('Account created successfully! Please wait while we set up your account...')
+        // The useEffect hook will handle the rest when user becomes available
+        // Note: If email confirmation is required, user will need to verify their email first
+        
+        // Check if user is immediately available (auto-confirm enabled)
+        // If not, the user will need to verify email and come back
+        setTimeout(() => {
+          if (!user) {
+            setAuthMessage('Please check your email to verify your account. After verification, you can proceed with booking.')
+          }
+        }, 2000)
+      }
     } catch (error) {
-      setAuthError('Error creating student profile. Please try again.')
+      setAuthError('Error creating account. Please try again.')
+      sessionStorage.removeItem('pendingBooking')
     }
     
     setAuthLoading(false)
@@ -300,7 +349,8 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
         // Don't fail the booking if email fails
       }
       
-      // Payment successful, show confirmation
+      // Payment successful, clear pending booking and show confirmation
+      sessionStorage.removeItem('pendingBooking')
       setAuthStep('confirmation')
     } catch (error) {
       console.error('Payment/booking error:', error)
@@ -315,6 +365,9 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
   }
 
   const handleCompleteBooking = () => {
+    // Clear any pending booking data
+    sessionStorage.removeItem('pendingBooking')
+    
     const selectedClass = classes.find(c => c.id === selectedClassId)
     if (selectedClass) {
       alert(`Booking confirmed! ${selectedClass.title} for ${formatDate(selectedClass.date)} at ${formatTime(selectedClass.time)}`)
