@@ -9,6 +9,9 @@ export interface Clase {
   enrolled: number; // number of students currently enrolled
   price: number;
   classDuration: number; // duration in minutes
+  class_type?: 'mini-chef' | 'mom-me'; // type of cooking class
+  menu?: string[]; // array of menu items
+  image_url?: string; // optional image URL
   created_at: string;
   updated_at: string;
 }
@@ -21,7 +24,9 @@ export type CocinarteClassType =
   | 'birthday-party'
   | 'healthy-cooking'
   | 'baking-fundamentals'
-  | 'private-event';
+  | 'private-event'
+  | 'mini-chef'
+  | 'mom-me';
 
 export interface CocinarteClase extends Clase {
   classType?: CocinarteClassType;
@@ -39,6 +44,9 @@ export interface CreateClaseData {
   enrolled?: number; // optional, defaults to 0
   price: number;
   classDuration: number;
+  class_type?: 'mini-chef' | 'mom-me';
+  menu?: string[];
+  image_url?: string;
 }
 
 export interface UpdateClaseData extends Partial<CreateClaseData> {

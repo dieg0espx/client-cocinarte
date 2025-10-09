@@ -19,29 +19,45 @@ import {
 } from "lucide-react"
 import CocinarteBookingPopup from "./cocinarte-booking-popup"
 import Image from "next/image"
-
-interface CookingClass {
-  id: string
-  title: string
-  date: Date
-  time: string
-  type: "mini-chef" | "mom-me"
-  price: number
-  menu: string[]
-  image?: string
-}
+import { CalendarClassesService, CalendarClass } from "@/lib/supabase/calendar-classes"
 
 export default function CocinarteMonthlyCalendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9)) // October 2025
   const [isMounted, setIsMounted] = useState(false)
-  const [selectedClass, setSelectedClass] = useState<CookingClass | null>(null)
+  const [selectedClass, setSelectedClass] = useState<CalendarClass | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'calendar' | 'cards'>('calendar')
   const [isBookingOpen, setIsBookingOpen] = useState(false)
+  const [cookingClasses, setCookingClasses] = useState<CalendarClass[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  const calendarService = new CalendarClassesService()
 
   useEffect(() => {
     setIsMounted(true)
+    loadClasses()
   }, [])
+
+  useEffect(() => {
+    if (isMounted) {
+      loadClasses()
+    }
+  }, [currentMonth])
+
+  const loadClasses = async () => {
+    setIsLoading(true)
+    try {
+      const classes = await calendarService.getClasesByMonth(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth()
+      )
+      setCookingClasses(classes)
+    } catch (error) {
+      console.error('Error loading classes:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   if (!isMounted) {
     return (
@@ -60,7 +76,10 @@ export default function CocinarteMonthlyCalendar() {
     "July", "August", "September", "October", "November", "December"
   ]
 
-  const cookingClasses: CookingClass[] = [
+  // Classes are now loaded from database via loadClasses()
+  // Remove old hardcoded array:
+  /*
+  const cookingClasses: CalendarClass[] = [
     // September 2025
     {
       id: "1",
@@ -378,7 +397,7 @@ export default function CocinarteMonthlyCalendar() {
       price: 100,
       menu: ["Details coming soon"]
     }
-  ]
+  ] */
 
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -442,7 +461,7 @@ export default function CocinarteMonthlyCalendar() {
     }
   }
 
-  const handleClassClick = (classItem: CookingClass) => {
+  const handleClassClick = (classItem: CalendarClass) => {
     console.log('Class clicked:', classItem)
     setSelectedClass(classItem)
     setIsDialogOpen(true)
@@ -815,10 +834,10 @@ export default function CocinarteMonthlyCalendar() {
             day: 'numeric' 
           })} • ${classItem.time}
         </div>
-        <div class="class-menu">
-          <div class="class-menu-title">Menu:</div>
-          ${classItem.menu.map(item => `<div class="class-menu-item">${item}</div>`).join('')}
-        </div>
+        ${classItem.description ? `<div class="class-menu">
+          <div class="class-menu-title">Description:</div>
+          <div class="class-menu-item">${classItem.description}</div>
+        </div>` : ''}
         <div class="class-price">$${classItem.price} per ${classItem.type === 'mini-chef' ? 'child' : 'pair'}</div>
       </div>
     `).join('')
@@ -843,8 +862,6 @@ export default function CocinarteMonthlyCalendar() {
       const isToday = date.toDateString() === new Date().toDateString()
       const hasClass = isClassDate(date)
 
-      const classWithImage = dayClasses.find(c => c.image)
-      
       days.push(
         <div 
           key={day} 
@@ -853,25 +870,11 @@ export default function CocinarteMonthlyCalendar() {
             hasClass ? 'bg-cocinarte-yellow/5' : 'bg-white'
           }`}
         >
-          {/* Background Image with Black Overlay */}
-          {classWithImage?.image && (
-            <>
-              <Image
-                src={classWithImage.image}
-                alt={classWithImage.title}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-black/0"></div>
-            </>
-          )}
-          
           {/* Content */}
           <div className="relative z-10">
             {/* Day Number */}
             <div className="flex items-center justify-between mb-1">
               <span className={`text-sm font-semibold ${
-                classWithImage?.image ? 'text-white' :
                 isToday ? 'text-cocinarte-blue' : 
                 hasClass ? 'text-cocinarte-navy' : 'text-slate'
               }`}>
@@ -900,7 +903,7 @@ export default function CocinarteMonthlyCalendar() {
                 </button>
               ))}
               {dayClasses.length > 2 && (
-                <div className={`text-xs ${classWithImage?.image ? 'text-white' : 'text-slate-medium'}`}>
+                <div className="text-xs text-slate-medium">
                   +{dayClasses.length - 2} more
                 </div>
               )}
@@ -1047,18 +1050,22 @@ export default function CocinarteMonthlyCalendar() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 mb-4">
-                  <p className="text-sm text-slate-medium font-semibold">Menu:</p>
-                  {classItem.menu.slice(0, 2).map((item, index) => (
-                    <p key={index} className="text-sm text-slate-medium line-clamp-2">
-                      {item}
+                {classItem.description && (
+                  <div className="space-y-2 mb-4">
+                    <p className="text-sm text-slate-medium line-clamp-3">
+                      {classItem.description}
                     </p>
-                  ))}
-                  {classItem.menu.length > 2 && (
-                    <p className="text-xs text-slate-medium">
-                      +{classItem.menu.length - 2} more items
-                    </p>
-                  )}
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <div className="text-xs">
+                    <span className="text-slate-medium">Duration:</span>
+                    <span className="font-semibold text-slate ml-1">{classItem.classDuration}min</span>
+                  </div>
+                  <div className="text-xs">
+                    <span className="text-slate-medium">Spots:</span>
+                    <span className="font-semibold text-slate ml-1">{classItem.maxStudents - classItem.enrolled}/{classItem.maxStudents}</span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-amber">${classItem.price}</span>
@@ -1130,18 +1137,31 @@ export default function CocinarteMonthlyCalendar() {
                 <span className="text-slate-medium text-xs sm:text-sm lg:text-base">per {selectedClass.type === 'mini-chef' ? 'child' : 'pair'}</span>
               </div>
 
-              {/* Menu */}
-              <div className="space-y-2 sm:space-y-3">
-                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-slate flex items-center space-x-2">
-                  <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 text-cocinarte-navy flex-shrink-0" />
-                  <span>Menu</span>
-                </h3>
-                <div className="space-y-2">
-                  {selectedClass.menu.map((item, index) => (
-                    <div key={index} className="p-2 sm:p-3 bg-slate-50 rounded-lg border-l-4 border-cocinarte-yellow">
-                      <p className="text-slate-medium text-xs sm:text-sm lg:text-base leading-relaxed">{item}</p>
-                    </div>
-                  ))}
+              {/* Description */}
+              {selectedClass.description && (
+                <div className="space-y-2 sm:space-y-3">
+                  <h3 className="text-base sm:text-lg lg:text-xl font-bold text-slate flex items-center space-x-2">
+                    <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 text-cocinarte-navy flex-shrink-0" />
+                    <span>About This Class</span>
+                  </h3>
+                  <div className="p-2 sm:p-3 bg-slate-50 rounded-lg border-l-4 border-cocinarte-yellow">
+                    <p className="text-slate-medium text-xs sm:text-sm lg:text-base leading-relaxed">{selectedClass.description}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Class Details */}
+              <div className="space-y-2">
+                <h3 className="text-base sm:text-lg lg:text-xl font-bold text-slate">Class Details</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-slate-50 p-3 rounded-lg">
+                    <p className="text-xs text-slate-medium mb-1">Duration</p>
+                    <p className="text-sm font-bold text-slate">{selectedClass.classDuration} minutes</p>
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-lg">
+                    <p className="text-xs text-slate-medium mb-1">Available Spots</p>
+                    <p className="text-sm font-bold text-slate">{selectedClass.maxStudents - selectedClass.enrolled} / {selectedClass.maxStudents}</p>
+                  </div>
                 </div>
               </div>
 
