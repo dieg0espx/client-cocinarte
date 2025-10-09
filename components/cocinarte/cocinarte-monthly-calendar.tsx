@@ -1165,7 +1165,11 @@ export default function CocinarteMonthlyCalendar() {
                 <Button 
                   onClick={() => {
                     setIsDialogOpen(false)
-                    setIsBookingOpen(true)
+                    // Scroll to contact section for payment/booking information
+                    const contactSection = document.getElementById('contact')
+                    if (contactSection) {
+                      contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }
                   }}
                   className="bg-cocinarte-red hover:bg-cocinarte-orange text-cocinarte-white font-bold rounded-xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-base lg:text-lg flex-[0.7]"
                 >
