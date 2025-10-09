@@ -50,34 +50,34 @@ export async function POST(request: NextRequest) {
 
     // Admin notification email
     const adminEmailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🎉 New Booking Received!</h1>
-          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">A new class has been booked</p>
+      <div style="font-family: 'Arial', 'Helvetica', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #FEFEFE;">
+        <div style="background: linear-gradient(135deg, #00ADEE 0%, #F0614F 100%); color: white; padding: 30px; text-align: center; border-radius: 15px 15px 0 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <h1 style="margin: 0; font-size: 32px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">🎉 New Booking Received!</h1>
+          <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">A new cooking class has been booked</p>
         </div>
         
-        <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-          <h2 style="color: #1e3a8a; margin: 0 0 20px 0; font-size: 22px;">Booking Details</h2>
+        <div style="background: white; padding: 30px; border: 3px solid #F48E77; border-top: none; border-radius: 0 0 15px 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <h2 style="color: #F0614F; margin: 0 0 20px 0; font-size: 24px; border-bottom: 3px solid #FCB414; padding-bottom: 10px;">Booking Details</h2>
           
-          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Class Information</h3>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Class:</strong> ${classTitle}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Date:</strong> ${formattedDate}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Time:</strong> ${formattedTime}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Price:</strong> $${classPrice}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Booking ID:</strong> ${bookingId}</p>
+          <div style="background: #CDECF9; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #00ADEE;">
+            <h3 style="color: #F0614F; margin: 0 0 15px 0; font-size: 20px;">🍳 Class Information</h3>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Class:</strong> ${classTitle}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Date:</strong> ${formattedDate}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Time:</strong> ${formattedTime}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Price:</strong> $${classPrice}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Booking ID:</strong> ${bookingId}</p>
           </div>
 
-          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Customer Information</h3>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Parent/Guardian:</strong> ${userName}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Email:</strong> <a href="mailto:${userEmail}" style="color: #1e3a8a;">${userEmail}</a></p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Student Name:</strong> ${studentName}</p>
+          <div style="background: #FFF5E6; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #FCB414;">
+            <h3 style="color: #F0614F; margin: 0 0 15px 0; font-size: 20px;">👨‍👩‍👧 Customer Information</h3>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Parent/Guardian:</strong> ${userName}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Email:</strong> <a href="mailto:${userEmail}" style="color: #F0614F; text-decoration: none;">${userEmail}</a></p>
+            <p style="margin: 8px 0; color: #333; font-size: 15px;"><strong style="color: #00ADEE;">Student Name:</strong> ${studentName}</p>
           </div>
 
-          <div style="background: #dbeafe; border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h4 style="color: #1e40af; margin: 0 0 10px 0; font-size: 16px;">📝 Action Required</h4>
-            <p style="color: #1e40af; margin: 0;">Please prepare materials and confirm class setup for this booking.</p>
+          <div style="background: linear-gradient(135deg, #FCB414 0%, #F48E77 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 3px 5px rgba(0,0,0,0.15);">
+            <h4 style="color: white; margin: 0 0 10px 0; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">📝 Action Required</h4>
+            <p style="color: white; margin: 0; font-size: 15px;">Please prepare materials and confirm class setup for this booking.</p>
           </div>
         </div>
       </div>
@@ -92,43 +92,46 @@ export async function POST(request: NextRequest) {
 
     // User confirmation email
     const userEmailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #dc2626 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">¡Booking Confirmed!</h1>
-          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your cooking class reservation is confirmed</p>
+      <div style="font-family: 'Arial', 'Helvetica', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #FEFEFE;">
+        <div style="background: linear-gradient(135deg, #F0614F 0%, #F48E77 50%, #FCB414 100%); color: white; padding: 35px; text-align: center; border-radius: 15px 15px 0 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <h1 style="margin: 0; font-size: 36px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">¡Booking Confirmed!</h1>
+          <p style="margin: 12px 0 0 0; font-size: 18px; opacity: 0.95;">Your cooking class reservation is confirmed 🎉</p>
         </div>
         
-        <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-          <h2 style="color: #1e3a8a; margin: 0 0 20px 0; font-size: 22px;">Booking Details</h2>
+        <div style="background: white; padding: 30px; border: 3px solid #F48E77; border-top: none; border-radius: 0 0 15px 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <h2 style="color: #F0614F; margin: 0 0 25px 0; font-size: 26px; border-bottom: 3px solid #FCB414; padding-bottom: 10px;">Your Booking Details</h2>
           
-          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Class Information</h3>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Class:</strong> ${classTitle}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Date:</strong> ${formattedDate}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Time:</strong> ${formattedTime}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Price:</strong> $${classPrice}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Booking ID:</strong> ${bookingId}</p>
+          <div style="background: #CDECF9; padding: 22px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #00ADEE;">
+            <h3 style="color: #F0614F; margin: 0 0 15px 0; font-size: 20px;">🍳 Class Information</h3>
+            <p style="margin: 8px 0; color: #333; font-size: 16px;"><strong style="color: #00ADEE;">Class:</strong> ${classTitle}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 16px;"><strong style="color: #00ADEE;">Date:</strong> ${formattedDate}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 16px;"><strong style="color: #00ADEE;">Time:</strong> ${formattedTime}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 16px;"><strong style="color: #00ADEE;">Price:</strong> $${classPrice}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 16px;"><strong style="color: #00ADEE;">Booking ID:</strong> ${bookingId}</p>
           </div>
 
-          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #374151; margin: 0 0 15px 0; font-size: 18px;">Student Information</h3>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Student Name:</strong> ${studentName}</p>
-            <p style="margin: 5px 0; color: #4b5563;"><strong>Parent/Guardian:</strong> ${userName}</p>
+          <div style="background: #FFF5E6; padding: 22px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #FCB414;">
+            <h3 style="color: #F0614F; margin: 0 0 15px 0; font-size: 20px;">👨‍🍳 Student Information</h3>
+            <p style="margin: 8px 0; color: #333; font-size: 16px;"><strong style="color: #00ADEE;">Student Name:</strong> ${studentName}</p>
+            <p style="margin: 8px 0; color: #333; font-size: 16px;"><strong style="color: #00ADEE;">Parent/Guardian:</strong> ${userName}</p>
           </div>
 
-          <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h4 style="color: #92400e; margin: 0 0 10px 0; font-size: 16px;">📋 Important Reminders</h4>
-            <ul style="color: #92400e; margin: 0; padding-left: 20px;">
-              <li>Please arrive 10 minutes before the class starts</li>
-              <li>Wear comfortable clothes that can get a little messy</li>
-              <li>Bring a water bottle for your little chef</li>
+          <div style="background: linear-gradient(135deg, #FCB414 0%, #F48E77 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 3px 5px rgba(0,0,0,0.15);">
+            <h4 style="color: white; margin: 0 0 12px 0; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">📋 Important Reminders</h4>
+            <ul style="color: white; margin: 0; padding-left: 20px; font-size: 15px; line-height: 1.6;">
+              <li style="margin-bottom: 8px;">Please arrive 10 minutes before the class starts</li>
+              <li style="margin-bottom: 8px;">Wear comfortable clothes that can get a little messy</li>
+              <li style="margin-bottom: 8px;">Bring a water bottle for your little chef</li>
               <li>All ingredients and equipment are provided</li>
             </ul>
           </div>
 
-          <div style="text-align: center; margin-top: 30px;">
-            <p style="color: #6b7280; margin: 0; font-size: 14px;">
-              Questions? Contact us at <a href="mailto:info@cocinartepdx.com" style="color: #1e3a8a; text-decoration: none;">info@cocinartepdx.com</a> or <a href="tel:+15039169758" style="color: #1e3a8a; text-decoration: none;">+1 (503) 916-9758</a>
+          <div style="text-align: center; margin-top: 30px; padding: 20px; background: #CDECF9; border-radius: 12px;">
+            <p style="color: #333; margin: 0 0 8px 0; font-size: 16px; font-weight: bold;">Questions? We're here to help!</p>
+            <p style="color: #333; margin: 0; font-size: 15px;">
+              📧 <a href="mailto:info@cocinartepdx.com" style="color: #F0614F; text-decoration: none; font-weight: bold;">info@cocinartepdx.com</a>
+              <br>
+              📞 <a href="tel:+15039169758" style="color: #F0614F; text-decoration: none; font-weight: bold;">+1 (503) 916-9758</a>
             </p>
           </div>
         </div>
