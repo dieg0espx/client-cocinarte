@@ -510,26 +510,6 @@ export default function StripePaymentsClient() {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => {
-                const refundablePayments = payments.filter(canRefund)
-                if (refundablePayments.length > 0) {
-                  handleRefundClick(refundablePayments[0])
-                } else {
-                  toast({
-                    title: "No Refundable Payments",
-                    description: "No payments available for refund",
-                    variant: "destructive",
-                  })
-                }
-              }}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              <Ban className="h-4 w-4 mr-2" />
-              Quick Refund
-            </Button>
             <div className="flex border rounded-md">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -560,59 +540,6 @@ export default function StripePaymentsClient() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Refund Summary */}
-          {payments.length > 0 && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-sm mb-1">Refund Summary</h3>
-                  <p className="text-xs text-muted-foreground">
-                    {payments.filter(canRefund).length} payments available for refund
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const refundablePayments = payments.filter(canRefund)
-                      if (refundablePayments.length > 0) {
-                        handleRefundClick(refundablePayments[0])
-                      } else {
-                        toast({
-                          title: "No Refundable Payments",
-                          description: "No payments available for refund",
-                          variant: "destructive",
-                        })
-                      }
-                    }}
-                    disabled={payments.filter(canRefund).length === 0}
-                  >
-                    <Ban className="h-4 w-4 mr-2" />
-                    Refund Latest Payment
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      const refundablePayments = payments.filter(canRefund)
-                      if (refundablePayments.length > 0) {
-                        const totalRefundable = refundablePayments.reduce((sum, p) => sum + (p.amount - p.amount_refunded), 0)
-                        toast({
-                          title: "Refundable Amount",
-                          description: `Total refundable: ${currency(totalRefundable)}`,
-                        })
-                      }
-                    }}
-                    disabled={payments.filter(canRefund).length === 0}
-                  >
-                    <DollarSign className="h-4 w-4 mr-2" />
-                    View Refundable Total
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
           {viewMode === 'table' ? (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -707,28 +634,16 @@ export default function StripePaymentsClient() {
                           </span>
                         </td>
                         <td className="p-3">
-                          <div className="flex gap-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handlePaymentClick(payment)
-                              }}
-                            >
-                              <Receipt className="h-4 w-4" />
-                            </Button>
-                            {canRefund(payment) && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={(e) => handleRefundClick(payment, e)}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Ban className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handlePaymentClick(payment)
+                            }}
+                          >
+                            <Receipt className="h-4 w-4" />
+                          </Button>
                         </td>
                       </tr>
                     )
@@ -866,17 +781,6 @@ export default function StripePaymentsClient() {
                         <Receipt className="h-3 w-3 mr-1" />
                         Details
                       </Button>
-                      {canRefund(payment) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={(e) => handleRefundClick(payment, e)}
-                          className="flex-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Ban className="h-3 w-3 mr-1" />
-                          Refund
-                        </Button>
-                      )}
                       {payment.receipt_url && (
                         <Button
                           size="sm"
