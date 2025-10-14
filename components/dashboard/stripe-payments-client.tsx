@@ -540,9 +540,7 @@ export default function StripePaymentsClient() {
           </div>
         </CardHeader>
         <CardContent>
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          ) : (
+          {viewMode === 'table' ? (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -665,172 +663,171 @@ export default function StripePaymentsClient() {
                 </tbody>
               </table>
             </div>
-          )}
-          {viewMode === 'grid' && (
+          ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-            {payments.map((payment) => {
-              const isRefunded = payment.amount_refunded > 0
-              const isFullyRefunded = payment.amount_refunded >= payment.amount
-              const isPartiallyRefunded = isRefunded && !isFullyRefunded
-              const cardDetails = payment.charges[0]?.payment_method_details?.card
+              {payments.map((payment) => {
+                const isRefunded = payment.amount_refunded > 0
+                const isFullyRefunded = payment.amount_refunded >= payment.amount
+                const isPartiallyRefunded = isRefunded && !isFullyRefunded
+                const cardDetails = payment.charges[0]?.payment_method_details?.card
 
-              return (
-                <div
-                  key={payment.id}
-                  className={`w-full p-4 border-2 rounded-lg cursor-pointer hover:shadow-lg transition-all relative ${
-                    isFullyRefunded ? 'border-red-300 bg-red-50/50' : 
-                    isPartiallyRefunded ? 'border-orange-300 bg-orange-50/50' :
-                    payment.status === 'succeeded' ? 'border-green-200 hover:border-green-400' : 
-                    'border-gray-200 hover:border-cocinarte-navy/30'
-                  }`}
-                >
-                  {/* Refund Badge */}
-                  {isFullyRefunded && (
-                    <div className="absolute top-2 right-2">
-                      <Badge variant="destructive" className="text-[10px]">
-                        FULLY REFUNDED
-                      </Badge>
-                    </div>
-                  )}
-                  {isPartiallyRefunded && (
-                    <div className="absolute top-2 right-2">
-                      <Badge className="bg-orange-500 text-white text-[10px]">
-                        PARTIAL REFUND
-                      </Badge>
-                    </div>
-                  )}
-
-                  <div onClick={() => handlePaymentClick(payment)}>
-                    <div className="flex items-start space-x-3 mb-3">
-                      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
-                        isFullyRefunded ? 'bg-red-100 text-red-600' : 
-                        payment.status === 'succeeded' ? 'bg-green-100 text-green-600' : 
-                        'bg-orange-100 text-orange-600'
-                      }`}>
-                        {getStatusIcon(payment.status)}
+                return (
+                  <div
+                    key={payment.id}
+                    className={`w-full p-4 border-2 rounded-lg cursor-pointer hover:shadow-lg transition-all relative ${
+                      isFullyRefunded ? 'border-red-300 bg-red-50/50' : 
+                      isPartiallyRefunded ? 'border-orange-300 bg-orange-50/50' :
+                      payment.status === 'succeeded' ? 'border-green-200 hover:border-green-400' : 
+                      'border-gray-200 hover:border-cocinarte-navy/30'
+                    }`}
+                  >
+                    {/* Refund Badge */}
+                    {isFullyRefunded && (
+                      <div className="absolute top-2 right-2">
+                        <Badge variant="destructive" className="text-[10px]">
+                          FULLY REFUNDED
+                        </Badge>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">
-                          {payment.metadata.customerName || 'Unknown Customer'}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {payment.metadata.className || payment.description || 'Cooking Class'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(payment.created * 1000).toLocaleDateString()} at {new Date(payment.created * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </p>
-                      </div>
-                    </div>
-
-                    {cardDetails && (
-                      <div className="flex items-center gap-2 mb-3">
-                        <CreditCard className="h-3 w-3 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground capitalize">
-                          {cardDetails.brand} •••• {cardDetails.last4}
-                          {cardDetails.funding && ` (${cardDetails.funding})`}
-                        </p>
+                    )}
+                    {isPartiallyRefunded && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-orange-500 text-white text-[10px]">
+                          PARTIAL REFUND
+                        </Badge>
                       </div>
                     )}
 
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between gap-2">
+                    <div onClick={() => handlePaymentClick(payment)}>
+                      <div className="flex items-start space-x-3 mb-3">
+                        <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
+                          isFullyRefunded ? 'bg-red-100 text-red-600' : 
+                          payment.status === 'succeeded' ? 'bg-green-100 text-green-600' : 
+                          'bg-orange-100 text-orange-600'
+                        }`}>
+                          {getStatusIcon(payment.status)}
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className={`font-bold text-lg ${
-                              isFullyRefunded ? 'text-red-600 line-through' : 
-                              payment.status === 'succeeded' ? 'text-green-600' : 
-                              'text-orange-600'
-                            }`}>
-                              {currency(payment.amount)}
-                            </p>
-                            {isFullyRefunded && (
-                              <Badge variant="outline" className="bg-red-50 text-red-600 border-red-300 text-[10px]">
-                                <div className="flex items-center gap-1">
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                  Refunded
-                                </div>
-                              </Badge>
+                          <p className="font-medium text-sm truncate">
+                            {payment.metadata.customerName || 'Unknown Customer'}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {payment.metadata.className || payment.description || 'Cooking Class'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(payment.created * 1000).toLocaleDateString()} at {new Date(payment.created * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </p>
+                        </div>
+                      </div>
+
+                      {cardDetails && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <CreditCard className="h-3 w-3 text-muted-foreground" />
+                          <p className="text-xs text-muted-foreground capitalize">
+                            {cardDetails.brand} •••• {cardDetails.last4}
+                            {cardDetails.funding && ` (${cardDetails.funding})`}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className={`font-bold text-lg ${
+                                isFullyRefunded ? 'text-red-600 line-through' : 
+                                payment.status === 'succeeded' ? 'text-green-600' : 
+                                'text-orange-600'
+                              }`}>
+                                {currency(payment.amount)}
+                              </p>
+                              {isFullyRefunded && (
+                                <Badge variant="outline" className="bg-red-50 text-red-600 border-red-300 text-[10px]">
+                                  <div className="flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Refunded
+                                  </div>
+                                </Badge>
+                              )}
+                              {isPartiallyRefunded && (
+                                <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-300 text-[10px]">
+                                  <div className="flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Partially Refunded
+                                  </div>
+                                </Badge>
+                              )}
+                            </div>
+                            {isRefunded && (
+                              <p className="text-xs font-medium text-red-600">
+                                -{currency(payment.amount_refunded)} refunded
+                              </p>
                             )}
-                            {isPartiallyRefunded && (
-                              <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-300 text-[10px]">
-                                <div className="flex items-center gap-1">
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                  Partially Refunded
-                                </div>
-                              </Badge>
+                            {payment.charges[0]?.net > 0 && !isFullyRefunded && (
+                              <p className="text-xs text-muted-foreground">
+                                Net: {currency(payment.charges[0].net)}
+                              </p>
                             )}
                           </div>
-                          {isRefunded && (
-                            <p className="text-xs font-medium text-red-600">
-                              -{currency(payment.amount_refunded)} refunded
-                            </p>
-                          )}
-                          {payment.charges[0]?.net > 0 && !isFullyRefunded && (
-                            <p className="text-xs text-muted-foreground">
-                              Net: {currency(payment.charges[0].net)}
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          {getStatusBadge(payment.status)}
+                          <div className="text-right">
+                            {getStatusBadge(payment.status)}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 mt-3 pt-3 border-t">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handlePaymentClick(payment)
-                      }}
-                      className="flex-1 text-xs"
-                    >
-                      <Receipt className="h-3 w-3 mr-1" />
-                      Details
-                    </Button>
-                    {canRefund(payment) && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => handleRefundClick(payment, e)}
-                        className="flex-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Ban className="h-3 w-3 mr-1" />
-                        Refund
-                      </Button>
-                    )}
-                    {payment.receipt_url && (
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-3 pt-3 border-t">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={(e) => {
                           e.stopPropagation()
-                          window.open(payment.receipt_url!, '_blank')
+                          handlePaymentClick(payment)
                         }}
                         className="flex-1 text-xs"
                       >
-                        <ExternalLink className="h-3 w-3 mr-1" />
-                        Receipt
+                        <Receipt className="h-3 w-3 mr-1" />
+                        Details
                       </Button>
-                    )}
+                      {canRefund(payment) && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => handleRefundClick(payment, e)}
+                          className="flex-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Ban className="h-3 w-3 mr-1" />
+                          Refund
+                        </Button>
+                      )}
+                      {payment.receipt_url && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            window.open(payment.receipt_url!, '_blank')
+                          }}
+                          className="flex-1 text-xs"
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Receipt
+                        </Button>
+                      )}
+                    </div>
                   </div>
+                )
+              })}
+              {payments.length === 0 && (
+                <div className="col-span-full text-center text-sm text-muted-foreground py-8">
+                  No payments found in Stripe.
                 </div>
-              )
-            })}
-            {payments.length === 0 && (
-              <div className="col-span-full text-center text-sm text-muted-foreground py-8">
-                No payments found in Stripe.
-              </div>
-            )}
-          </div>
+              )}
+            </div>
           )}
           {payments.length === 0 && viewMode === 'table' && (
             <div className="text-center text-sm text-muted-foreground py-8">
@@ -842,4 +839,3 @@ export default function StripePaymentsClient() {
     </>
   )
 }
-
