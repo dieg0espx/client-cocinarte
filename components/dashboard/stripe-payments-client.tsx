@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { DollarSign, RefreshCw, CreditCard, AlertCircle, CheckCircle, Clock, XCircle, Receipt, Copy, ExternalLink, Ban } from 'lucide-react'
+import { DollarSign, RefreshCw, CreditCard, AlertCircle, CheckCircle, Clock, XCircle, Receipt, Copy, ExternalLink, Ban, Grid3X3, List } from 'lucide-react'
 import { StripePaymentDetails } from '@/lib/types/stripe-payments'
 import {
   Dialog,
@@ -29,6 +29,7 @@ export default function StripePaymentsClient() {
   const [refundAmount, setRefundAmount] = useState('')
   const [refundReason, setRefundReason] = useState<'duplicate' | 'fraudulent' | 'requested_by_customer'>('requested_by_customer')
   const [isRefunding, setIsRefunding] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const { toast } = useToast()
 
   const fetchPayments = async () => {
@@ -215,7 +216,11 @@ export default function StripePaymentsClient() {
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground">Capture Method</Label>
-                    <p className="text-xs capitalize">{selectedPayment.capture_method}</p>
+                    <p className="text-xs capitalize">
+                      {selectedPayment.capture_method === 'automatic' ? 'Automatic' : 
+                       selectedPayment.capture_method === 'manual' ? 'Manual' : 
+                       selectedPayment.capture_method}
+                    </p>
                   </div>
                   {selectedPayment.charges.length > 0 && selectedPayment.charges[0].receipt_number && (
                     <div>
@@ -504,18 +509,165 @@ export default function StripePaymentsClient() {
               All payments from Stripe ({payments.length} total)
             </CardDescription>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={refreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex border rounded-md">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="rounded-l-none"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 font-medium text-sm text-muted-foreground">Amount</th>
+                    <th className="text-left p-3 font-medium text-sm text-muted-foreground">Payment Method</th>
+                    <th className="text-left p-3 font-medium text-sm text-muted-foreground">Description</th>
+                    <th className="text-left p-3 font-medium text-sm text-muted-foreground">Customer</th>
+                    <th className="text-left p-3 font-medium text-sm text-muted-foreground">Date</th>
+                    <th className="text-left p-3 font-medium text-sm text-muted-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((payment) => {
+                    const isRefunded = payment.amount_refunded > 0
+                    const isFullyRefunded = payment.amount_refunded >= payment.amount
+                    const isPartiallyRefunded = isRefunded && !isFullyRefunded
+                    const cardDetails = payment.charges[0]?.payment_method_details?.card
+
+                    return (
+                      <tr 
+                        key={payment.id}
+                        className="border-b hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handlePaymentClick(payment)}
+                      >
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-medium ${
+                              isFullyRefunded ? 'text-red-600 line-through' : 
+                              payment.status === 'succeeded' ? 'text-green-600' : 
+                              'text-orange-600'
+                            }`}>
+                              {currency(payment.amount)}
+                            </span>
+                            {isFullyRefunded && (
+                              <Badge variant="outline" className="bg-red-50 text-red-600 border-red-300 text-[10px]">
+                                <div className="flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Refunded
+                                </div>
+                              </Badge>
+                            )}
+                            {isPartiallyRefunded && (
+                              <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-300 text-[10px]">
+                                <div className="flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Partially Refunded
+                                </div>
+                              </Badge>
+                            )}
+                          </div>
+                          {isRefunded && (
+                            <div className="text-xs text-red-600 mt-1">
+                              -{currency(payment.amount_refunded)} refunded
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            {cardDetails ? (
+                              <>
+                                <div className="w-6 h-4 bg-blue-600 rounded text-white text-xs flex items-center justify-center">
+                                  {cardDetails.brand.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-sm">
+                                  .... {cardDetails.last4}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">
+                            {payment.metadata.className || payment.description || 'Cooking Class'}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">
+                            {payment.metadata.customerName || 'Unknown Customer'}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span className="text-sm">
+                            {new Date(payment.created * 1000).toLocaleDateString()}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handlePaymentClick(payment)
+                              }}
+                            >
+                              <Receipt className="h-4 w-4" />
+                            </Button>
+                            {canRefund(payment) && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={(e) => handleRefundClick(payment, e)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Ban className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {viewMode === 'grid' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {payments.map((payment) => {
               const isRefunded = payment.amount_refunded > 0
               const isFullyRefunded = payment.amount_refunded >= payment.amount
@@ -583,13 +735,35 @@ export default function StripePaymentsClient() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <p className={`font-bold text-lg ${
-                            isFullyRefunded ? 'text-red-600 line-through' : 
-                            payment.status === 'succeeded' ? 'text-green-600' : 
-                            'text-orange-600'
-                          }`}>
-                            {currency(payment.amount)}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className={`font-bold text-lg ${
+                              isFullyRefunded ? 'text-red-600 line-through' : 
+                              payment.status === 'succeeded' ? 'text-green-600' : 
+                              'text-orange-600'
+                            }`}>
+                              {currency(payment.amount)}
+                            </p>
+                            {isFullyRefunded && (
+                              <Badge variant="outline" className="bg-red-50 text-red-600 border-red-300 text-[10px]">
+                                <div className="flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Refunded
+                                </div>
+                              </Badge>
+                            )}
+                            {isPartiallyRefunded && (
+                              <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-300 text-[10px]">
+                                <div className="flex items-center gap-1">
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Partially Refunded
+                                </div>
+                              </Badge>
+                            )}
+                          </div>
                           {isRefunded && (
                             <p className="text-xs font-medium text-red-600">
                               -{currency(payment.amount_refunded)} refunded
@@ -657,6 +831,12 @@ export default function StripePaymentsClient() {
               </div>
             )}
           </div>
+          )}
+          {payments.length === 0 && viewMode === 'table' && (
+            <div className="text-center text-sm text-muted-foreground py-8">
+              No payments found in Stripe.
+            </div>
+          )}
         </CardContent>
       </Card>
     </>

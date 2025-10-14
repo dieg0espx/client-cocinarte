@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const paymentIntents = await stripe.paymentIntents.list({
       limit: limit,
       starting_after: startingAfter,
-      expand: ['data.charges', 'data.charges.data.refunds'],
+      expand: ['data.charges', 'data.charges.data.refunds', 'data.payment_method'],
     });
 
     // Transform Stripe payment intents to our format
@@ -120,8 +120,8 @@ export async function GET(request: NextRequest) {
           application_fee_amount: pi.application_fee_amount,
           cancellation_reason: pi.cancellation_reason,
           canceled_at: pi.canceled_at,
-          capture_method: pi.capture_method,
-          confirmation_method: pi.confirmation_method,
+          capture_method: pi.capture_method || 'automatic',
+          confirmation_method: pi.confirmation_method || 'automatic',
           processing: pi.processing ? { type: pi.processing.type || 'unknown' } : null,
         };
       })
