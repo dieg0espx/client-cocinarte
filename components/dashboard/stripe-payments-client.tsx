@@ -625,7 +625,7 @@ export default function StripePaymentsClient() {
                         </td>
                         <td className="p-3">
                           <span className="text-sm">
-                            {payment.metadata.customerName || 'Unknown Customer'}
+                            {payment.metadata.customerName || payment.customer_email || payment.charges[0]?.billing_details?.email || 'Guest'}
                           </span>
                         </td>
                         <td className="p-3">
@@ -696,7 +696,7 @@ export default function StripePaymentsClient() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm truncate">
-                            {payment.metadata.customerName || 'Unknown Customer'}
+                            {payment.metadata.customerName || payment.customer_email || payment.charges[0]?.billing_details?.email || 'Guest'}
                           </p>
                           <p className="text-xs text-muted-foreground truncate">
                             {payment.metadata.className || payment.description || 'Cooking Class'}
