@@ -350,7 +350,8 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
         student_id: studentInfo.id,
         payment_amount: selectedClassData.price,
         payment_method: 'stripe',
-        notes: `Booking for ${selectedClassData.title} on ${formatDate(selectedClassData.date)} at ${formatTime(selectedClassData.time)}. Payment Intent: ${paymentIntentId}`
+        stripe_payment_intent_id: paymentIntentId,
+        notes: `Booking for ${selectedClassData.title} on ${formatDate(selectedClassData.date)} at ${formatTime(selectedClassData.time)}`
       })
 
       // Update enrolled count in the class

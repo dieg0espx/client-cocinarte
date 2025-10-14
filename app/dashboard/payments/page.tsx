@@ -1,12 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { DashboardLayout } from '@/components/dashboard/dashboard-layout'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { DollarSign, Plus, Edit, Trash2, Calendar, User, CreditCard } from 'lucide-react'
-import PaymentsClient from '@/components/dashboard/payments-client'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DollarSign, CreditCard, TrendingUp, RefreshCw } from 'lucide-react'
+import StripePaymentsClient from '@/components/dashboard/stripe-payments-client'
 import { isAdminUser } from '@/lib/supabase/admin'
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-12-18.acacia',
+})
 
 export default async function PaymentsPage() {
   const supabase = createClient()
@@ -26,54 +29,42 @@ export default async function PaymentsPage() {
     redirect('/?error=admin_only')
   }
 
-  // Fetch bookings with related class and student info
-  const { data: bookings, error } = await supabase
-    .from('bookings')
-    .select(`
-      id,
-      payment_amount,
-      payment_status,
-      booking_date,
-      class:clases(title),
-      student:students(parent_name, child_name)
-    `)
-    .order('booking_date', { ascending: false })
-    .limit(50)
+  // Fetch payments from Stripe
+  let totalRevenue = 0
+  let pendingAmount = 0
+  let paidThisMonth = 0
+  let averageFee = 0
+  let paymentCount = 0
 
-  if (error) {
-    // If fetching fails, render dashboard with zeros and no recent payments
-    console.error('Error loading payments:', error.message)
-  }
+  try {
+    const paymentIntents = await stripe.paymentIntents.list({
+      limit: 100,
+    })
 
-  const safeBookings = bookings || []
-
-  // Compute stats
-  const currency = (value: number) => `$${value.toFixed(2)}`
-  const isSameMonth = (iso: string) => {
-    const d = new Date(iso)
     const now = new Date()
-    return d.getUTCFullYear() === now.getUTCFullYear() && d.getUTCMonth() === now.getUTCMonth()
+    const currentMonth = now.getMonth()
+    const currentYear = now.getFullYear()
+
+    const succeeded = paymentIntents.data.filter(pi => pi.status === 'succeeded')
+    const pending = paymentIntents.data.filter(pi => pi.status === 'processing' || pi.status === 'requires_payment_method')
+
+    totalRevenue = succeeded.reduce((sum, pi) => sum + (pi.amount_received / 100), 0)
+    pendingAmount = pending.reduce((sum, pi) => sum + (pi.amount / 100), 0)
+    
+    const thisMonth = succeeded.filter(pi => {
+      const date = new Date(pi.created * 1000)
+      return date.getMonth() === currentMonth && date.getFullYear() === currentYear
+    })
+    
+    paidThisMonth = thisMonth.reduce((sum, pi) => sum + (pi.amount_received / 100), 0)
+    
+    paymentCount = succeeded.length
+    averageFee = paymentCount > 0 ? totalRevenue / paymentCount : 0
+  } catch (error) {
+    console.error('Error fetching Stripe stats:', error)
   }
 
-  const totalRevenue = safeBookings
-    .filter(b => b.payment_status === 'completed')
-    .reduce((sum, b) => sum + (b.payment_amount || 0), 0)
-
-  const pendingAmount = safeBookings
-    .filter(b => b.payment_status === 'pending')
-    .reduce((sum, b) => sum + (b.payment_amount || 0), 0)
-
-  const paidThisMonth = safeBookings
-    .filter(b => b.payment_status === 'completed' && isSameMonth(b.booking_date))
-    .reduce((sum, b) => sum + (b.payment_amount || 0), 0)
-
-  const completed = safeBookings.filter(b => b.payment_status === 'completed')
-  const averageFee = completed.length > 0
-    ? completed.reduce((sum, b) => sum + (b.payment_amount || 0), 0) / completed.length
-    : 0
-
-  // Recent payments (latest 3 from safeBookings)
-  const recent = safeBookings.slice(0, 3)
+  const currency = (value: number) => `$${value.toFixed(2)}`
 
   return (
     <DashboardLayout>
@@ -81,16 +72,15 @@ export default async function PaymentsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Cocinarte Payments</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Stripe Payments</h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Track Cocinarte cooking class payments and manage billing.
+              Manage all payments, issue refunds, and track transactions from Stripe.
             </p>
           </div>
-          <Button className="w-full sm:w-auto flex-shrink-0">
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Record Cooking Class Payment</span>
-            <span className="sm:hidden">Record Payment</span>
-          </Button>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <RefreshCw className="h-3 w-3" />
+            <span>Data from Stripe</span>
+          </div>
         </div>
 
         {/* Payment Summary Cards */}
@@ -101,9 +91,9 @@ export default async function PaymentsPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">{currency(totalRevenue)}</div>
+              <div className="text-xl sm:text-2xl font-bold text-green-600">{currency(totalRevenue)}</div>
               <p className="text-xs text-muted-foreground">
-                Cocinarte revenue this month
+                All successful payments
               </p>
             </CardContent>
           </Card>
@@ -114,44 +104,42 @@ export default async function PaymentsPage() {
               <CreditCard className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">{currency(pendingAmount)}</div>
+              <div className="text-xl sm:text-2xl font-bold text-orange-600">{currency(pendingAmount)}</div>
               <p className="text-xs text-muted-foreground">
-                Outstanding payments
+                Processing or incomplete
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Paid This Month</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+              <CardTitle className="text-xs sm:text-sm font-medium">This Month</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">{currency(paidThisMonth)}</div>
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{currency(paidThisMonth)}</div>
               <p className="text-xs text-muted-foreground">
-                Completed this month
+                Revenue this month
               </p>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Average Fee</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Average Transaction</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             </CardHeader>
             <CardContent>
               <div className="text-xl sm:text-2xl font-bold">{currency(averageFee)}</div>
               <p className="text-xs text-muted-foreground">
-                Per cooking class
+                {paymentCount} total payments
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Recent Payments (interactive) */}
-        <PaymentsClient initialBookings={safeBookings} />
-
-        {/* Quick Actions handled in client component */}
+        {/* Stripe Payments List with Refund Capability */}
+        <StripePaymentsClient />
       </div>
     </DashboardLayout>
   )

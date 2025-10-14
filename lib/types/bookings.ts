@@ -19,6 +19,7 @@ export interface CreateBookingData {
   student_id: string;
   payment_amount: number;
   payment_method?: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'stripe';
+  stripe_payment_intent_id?: string;
   notes?: string;
 }
 
