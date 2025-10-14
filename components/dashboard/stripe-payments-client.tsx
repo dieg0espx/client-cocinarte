@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { DollarSign, RefreshCw, CreditCard, AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { DollarSign, RefreshCw, CreditCard, AlertCircle, CheckCircle, Clock, XCircle, Receipt, Copy, ExternalLink, Ban } from 'lucide-react'
 import { StripePaymentDetails } from '@/lib/types/stripe-payments'
 import {
   Dialog,
@@ -64,10 +64,23 @@ export default function StripePaymentsClient() {
     setIsDetailsOpen(true)
   }
 
-  const handleRefundClick = (payment: StripePaymentDetails) => {
+  const handleRefundClick = (payment: StripePaymentDetails, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
     setSelectedPayment(payment)
-    setRefundAmount((payment.amount / 100).toFixed(2))
+    setRefundAmount(((payment.amount - payment.amount_refunded) / 100).toFixed(2))
     setIsRefundOpen(true)
+  }
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    toast({
+      title: "Copied!",
+      description: `${label} copied to clipboard`,
+    })
+  }
+
+  const openStripePayment = (paymentIntentId: string) => {
+    window.open(`https://dashboard.stripe.com/payments/${paymentIntentId}`, '_blank')
   }
 
   const processRefund = async () => {
@@ -378,19 +391,57 @@ export default function StripePaymentsClient() {
               )}
             </div>
           )}
-          <DialogFooter>
-            {selectedPayment && canRefund(selectedPayment) && (
-              <Button 
-                variant="destructive"
-                onClick={() => {
-                  setIsDetailsOpen(false)
-                  handleRefundClick(selectedPayment)
-                }}
-              >
-                Issue Refund
-              </Button>
-            )}
-            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Close</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <div className="flex gap-2 flex-1">
+              {selectedPayment && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => copyToClipboard(selectedPayment.id, 'Payment ID')}
+                    className="flex-1"
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy ID
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openStripePayment(selectedPayment.id)}
+                    className="flex-1"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View in Stripe
+                  </Button>
+                  {selectedPayment.receipt_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(selectedPayment.receipt_url!, '_blank')}
+                      className="flex-1"
+                    >
+                      <Receipt className="h-4 w-4 mr-2" />
+                      Receipt
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+            <div className="flex gap-2">
+              {selectedPayment && canRefund(selectedPayment) && (
+                <Button 
+                  variant="destructive"
+                  onClick={() => {
+                    setIsDetailsOpen(false)
+                    handleRefundClick(selectedPayment)
+                  }}
+                >
+                  <Ban className="h-4 w-4 mr-2" />
+                  Issue Refund
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Close</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -468,68 +519,132 @@ export default function StripePaymentsClient() {
             {payments.map((payment) => {
               const isRefunded = payment.amount_refunded > 0
               const isFullyRefunded = payment.amount_refunded >= payment.amount
+              const isPartiallyRefunded = isRefunded && !isFullyRefunded
               const cardDetails = payment.charges[0]?.payment_method_details?.card
 
               return (
                 <div
                   key={payment.id}
-                  onClick={() => handlePaymentClick(payment)}
-                  className="w-full p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow hover:border-cocinarte-navy/30"
+                  className={`w-full p-4 border-2 rounded-lg cursor-pointer hover:shadow-lg transition-all relative ${
+                    isFullyRefunded ? 'border-red-300 bg-red-50/50' : 
+                    isPartiallyRefunded ? 'border-orange-300 bg-orange-50/50' :
+                    payment.status === 'succeeded' ? 'border-green-200 hover:border-green-400' : 
+                    'border-gray-200 hover:border-cocinarte-navy/30'
+                  }`}
                 >
-                  <div className="flex items-start space-x-3 mb-3">
-                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
-                      isFullyRefunded ? 'bg-red-100 text-red-600' : 
-                      payment.status === 'succeeded' ? 'bg-green-100 text-green-600' : 
-                      'bg-orange-100 text-orange-600'
-                    }`}>
-                      {getStatusIcon(payment.status)}
+                  {/* Refund Badge */}
+                  {isFullyRefunded && (
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="destructive" className="text-[10px]">
+                        FULLY REFUNDED
+                      </Badge>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {payment.metadata.customerName || 'Unknown Customer'}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {payment.metadata.className || payment.description || 'Cooking Class'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(payment.created * 1000).toLocaleDateString()}
-                      </p>
+                  )}
+                  {isPartiallyRefunded && (
+                    <div className="absolute top-2 right-2">
+                      <Badge className="bg-orange-500 text-white text-[10px]">
+                        PARTIAL REFUND
+                      </Badge>
+                    </div>
+                  )}
+
+                  <div onClick={() => handlePaymentClick(payment)}>
+                    <div className="flex items-start space-x-3 mb-3">
+                      <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
+                        isFullyRefunded ? 'bg-red-100 text-red-600' : 
+                        payment.status === 'succeeded' ? 'bg-green-100 text-green-600' : 
+                        'bg-orange-100 text-orange-600'
+                      }`}>
+                        {getStatusIcon(payment.status)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {payment.metadata.customerName || 'Unknown Customer'}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {payment.metadata.className || payment.description || 'Cooking Class'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(payment.created * 1000).toLocaleDateString()} at {new Date(payment.created * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </p>
+                      </div>
+                    </div>
+
+                    {cardDetails && (
+                      <div className="flex items-center gap-2 mb-3">
+                        <CreditCard className="h-3 w-3 text-muted-foreground" />
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {cardDetails.brand} •••• {cardDetails.last4}
+                          {cardDetails.funding && ` (${cardDetails.funding})`}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-bold text-lg ${
+                            isFullyRefunded ? 'text-red-600 line-through' : 
+                            payment.status === 'succeeded' ? 'text-green-600' : 
+                            'text-orange-600'
+                          }`}>
+                            {currency(payment.amount)}
+                          </p>
+                          {isRefunded && (
+                            <p className="text-xs font-medium text-red-600">
+                              -{currency(payment.amount_refunded)} refunded
+                            </p>
+                          )}
+                          {payment.charges[0]?.net > 0 && !isFullyRefunded && (
+                            <p className="text-xs text-muted-foreground">
+                              Net: {currency(payment.charges[0].net)}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          {getStatusBadge(payment.status)}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {cardDetails && (
-                    <p className="text-xs text-muted-foreground mb-2 capitalize">
-                      {cardDetails.brand} •••• {cardDetails.last4}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-lg ${
-                        isFullyRefunded ? 'text-red-600 line-through' : 
-                        payment.status === 'succeeded' ? 'text-green-600' : 
-                        'text-orange-600'
-                      }`}>
-                        {currency(payment.amount)}
-                      </p>
-                      {isRefunded && (
-                        <p className="text-xs text-red-600">
-                          Refunded: {currency(payment.amount_refunded)}
-                        </p>
-                      )}
-                      <div className="mt-1">{getStatusBadge(payment.status)}</div>
-                    </div>
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 mt-3 pt-3 border-t">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handlePaymentClick(payment)
+                      }}
+                      className="flex-1 text-xs"
+                    >
+                      <Receipt className="h-3 w-3 mr-1" />
+                      Details
+                    </Button>
                     {canRefund(payment) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => handleRefundClick(payment, e)}
+                        className="flex-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Ban className="h-3 w-3 mr-1" />
+                        Refund
+                      </Button>
+                    )}
+                    {payment.receipt_url && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={(e) => {
                           e.stopPropagation()
-                          handleRefundClick(payment)
+                          window.open(payment.receipt_url!, '_blank')
                         }}
-                        className="flex-shrink-0"
+                        className="flex-1 text-xs"
                       >
-                        <CreditCard className="h-3 w-3" />
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Receipt
                       </Button>
                     )}
                   </div>
