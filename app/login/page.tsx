@@ -10,6 +10,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/auth-context'
 import { Eye, EyeOff, Mail, Lock, LogIn } from 'lucide-react'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
+import { isAdminUser } from '@/lib/supabase/admin'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -32,11 +34,24 @@ export default function LoginPage() {
     
     if (error) {
       setError(error.message)
-    } else {
-      setMessage('Successfully signed in!')
-      router.push('/dashboard')
+      setLoading(false)
+      return
+    }
+
+    // Check if user is an admin
+    const supabase = createClient()
+    const isAdmin = await isAdminUser(supabase, email)
+    
+    if (!isAdmin) {
+      setError('Access denied. Only admin users can access the dashboard.')
+      // Sign out the user since they're not an admin
+      await supabase.auth.signOut()
+      setLoading(false)
+      return
     }
     
+    setMessage('Successfully signed in!')
+    router.push('/dashboard')
     setLoading(false)
   }
 

@@ -5,6 +5,7 @@ import { BookingsTable } from '@/components/dashboard/bookings-table'
 import { BookingsStats } from '@/components/dashboard/bookings-stats'
 import { Button } from '@/components/ui/button'
 import { Plus, Download, Filter } from 'lucide-react'
+import { isAdminUser } from '@/lib/supabase/admin'
 
 export default async function BookingsPage() {
   const supabase = createClient()
@@ -15,6 +16,13 @@ export default async function BookingsPage() {
 
   if (!user) {
     redirect('/login')
+  }
+
+  // Verify user is an admin
+  const isAdmin = await isAdminUser(supabase, user.email)
+  
+  if (!isAdmin) {
+    redirect('/?error=admin_only')
   }
 
   return (

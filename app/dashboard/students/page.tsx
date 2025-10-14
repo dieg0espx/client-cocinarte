@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Users, Plus, Edit, Trash2, Mail, Phone, Calendar, BookOpen } from 'lucide-react'
 import { StudentsClient } from '@/components/dashboard/students-client'
+import { isAdminUser } from '@/lib/supabase/admin'
 
 export default async function StudentsPage() {
   const supabase = createClient()
@@ -16,6 +17,13 @@ export default async function StudentsPage() {
 
   if (!user) {
     redirect('/login')
+  }
+
+  // Verify user is an admin
+  const isAdmin = await isAdminUser(supabase, user.email)
+  
+  if (!isAdmin) {
+    redirect('/?error=admin_only')
   }
 
   const { data: students, error } = await supabase

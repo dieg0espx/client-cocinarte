@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { DollarSign, Plus, Edit, Trash2, Calendar, User, CreditCard } from 'lucide-react'
 import PaymentsClient from '@/components/dashboard/payments-client'
+import { isAdminUser } from '@/lib/supabase/admin'
 
 export default async function PaymentsPage() {
   const supabase = createClient()
@@ -16,6 +17,13 @@ export default async function PaymentsPage() {
 
   if (!user) {
     redirect('/login')
+  }
+
+  // Verify user is an admin
+  const isAdmin = await isAdminUser(supabase, user.email)
+  
+  if (!isAdmin) {
+    redirect('/?error=admin_only')
   }
 
   // Fetch bookings with related class and student info

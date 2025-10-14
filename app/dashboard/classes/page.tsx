@@ -4,6 +4,7 @@ import { DashboardLayout } from '@/components/dashboard/dashboard-layout'
 import { ClasesService } from '@/lib/supabase/clases'
 import { Clase } from '@/lib/types/clases'
 import { ClassesClient } from '@/components/dashboard/classes-client'
+import { isAdminUser } from '@/lib/supabase/admin'
 
 export default async function ClassesPage() {
   const supabase = createClient()
@@ -14,6 +15,13 @@ export default async function ClassesPage() {
 
   if (!user) {
     redirect('/login')
+  }
+
+  // Verify user is an admin
+  const isAdmin = await isAdminUser(supabase, user.email)
+  
+  if (!isAdmin) {
+    redirect('/?error=admin_only')
   }
 
   // Fetch classes from the database
