@@ -30,6 +30,10 @@ export default async function ClassesPage() {
   
   try {
     clases = await clasesService.getAllClases()
+    console.log('=== Classes fetched from database ===')
+    console.log('Total classes:', clases.length)
+    console.log('All classes data:', JSON.stringify(clases, null, 2))
+    console.log('=====================================')
   } catch (error) {
     console.error('Error fetching classes:', error)
     // If table doesn't exist yet, show empty state

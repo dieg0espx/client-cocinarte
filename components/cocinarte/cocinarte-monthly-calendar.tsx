@@ -855,6 +855,9 @@ export default function CocinarteMonthlyCalendar() {
       const isToday = date.toDateString() === new Date().toDateString()
       const hasClass = isClassDate(date)
 
+      // Get the image from the first class that has one
+      const dayImage = dayClasses.find(classItem => classItem.image_url)?.image_url
+
       days.push(
         <div 
           key={day} 
@@ -862,22 +865,33 @@ export default function CocinarteMonthlyCalendar() {
             isToday ? 'bg-cocinarte-blue/10' : 
             hasClass ? 'bg-cocinarte-yellow/5' : 'bg-white'
           }`}
+          style={dayImage ? {
+            backgroundImage: `url(${dayImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          } : {}}
         >
+          {/* Semi-transparent overlay for text readability when image is present */}
+          {dayImage && (
+            <div className="absolute inset-0 bg-black/30"></div>
+          )}
+          
           {/* Content */}
           <div className="relative z-10">
             {/* Day Number */}
             <div className="flex items-center justify-between mb-1">
               <span className={`text-sm font-semibold ${
+                dayImage ? 'text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]' :
                 isToday ? 'text-cocinarte-blue' : 
                 hasClass ? 'text-cocinarte-navy' : 'text-slate'
               }`}>
                 {day}
               </span>
               {isToday && (
-                <div className="w-2 h-2 bg-cocinarte-blue rounded-full"></div>
+                <div className={`w-2 h-2 rounded-full ${dayImage ? 'bg-white' : 'bg-cocinarte-blue'}`}></div>
               )}
               {hasClass && !isToday && (
-                <div className="w-2 h-2 bg-cocinarte-yellow rounded-full"></div>
+                <div className={`w-2 h-2 rounded-full ${dayImage ? 'bg-white' : 'bg-cocinarte-yellow'}`}></div>
               )}
             </div>
 
@@ -887,16 +901,16 @@ export default function CocinarteMonthlyCalendar() {
                 <button
                   key={classItem.id}
                   onClick={() => handleClassClick(classItem)}
-                  className={`text-xs p-0.5 sm:p-1 rounded font-medium w-full text-left hover:opacity-80 transition-opacity cursor-pointer ${getTypeColor(classItem.type, classItem.price)}`}
+                  className={`text-xs p-0.5 sm:p-1 rounded font-medium w-full text-left hover:opacity-90 transition-all cursor-pointer ${dayImage ? 'bg-black/50 text-white' : getTypeColor(classItem.type, classItem.price)}`}
                 >
-                  <span className="truncate">
+                  <span className={`truncate ${dayImage ? 'drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' : ''}`}>
                     <span className="sm:hidden">{classItem.title}</span>
                     <span className="hidden sm:inline">{classItem.title}</span>
                   </span>
                 </button>
               ))}
               {dayClasses.length > 2 && (
-                <div className="text-xs text-slate-medium">
+                <div className={`text-xs ${dayImage ? 'text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]' : 'text-slate-medium'}`}>
                   +{dayClasses.length - 2} more
                 </div>
               )}

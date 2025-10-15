@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { ImageUpload } from '@/components/ui/image-upload'
 import {
   Select,
   SelectContent,
@@ -32,6 +33,9 @@ interface ClassFormProps {
 
 export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   // Initialize form data based on editing class
   const getInitialFormData = (): CreateClaseData => {
@@ -47,6 +51,7 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
         price: editingClass.price,
         classDuration: editingClass.classDuration,
         class_type: editingClass.class_type,
+        image_url: editingClass.image_url,
       }
     }
     return {
@@ -59,6 +64,7 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
       price: 0,
       classDuration: 60,
       class_type: undefined,
+      image_url: null,
     }
   }
 
@@ -69,6 +75,8 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
     const initialData = getInitialFormData()
     console.log('Setting form data:', initialData)
     setFormData(initialData)
+    setImageFile(null)
+    setUploadError(null)
   }, [editingClass])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,6 +112,57 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
       ...prev,
       [field]: value
     }))
+  }
+
+  const handleImageChange = async (file: File | null, previewUrl: string | null) => {
+    setImageFile(file)
+    setUploadError(null)
+
+    if (!file || !previewUrl) {
+      // Image was removed
+      setFormData(prev => ({
+        ...prev,
+        image_url: null
+      }))
+      return
+    }
+
+    // Upload to Cloudinary
+    setIsUploadingImage(true)
+    try {
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          file: previewUrl, // Send base64 data
+          folder: 'coci',
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image')
+      }
+
+      const data = await response.json()
+      
+      // Store the Cloudinary URL
+      setFormData(prev => ({
+        ...prev,
+        image_url: data.url
+      }))
+    } catch (error) {
+      console.error('Image upload error:', error)
+      setUploadError('Failed to upload image. Please try again.')
+      setImageFile(null)
+      setFormData(prev => ({
+        ...prev,
+        image_url: null
+      }))
+    } finally {
+      setIsUploadingImage(false)
+    }
   }
 
   return (
@@ -143,6 +202,24 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
                 placeholder="Describe what students will learn..."
                 rows={3}
               />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Class Image</Label>
+              <ImageUpload
+                value={formData.image_url}
+                onChange={handleImageChange}
+                maxSizeMB={5}
+                disabled={isUploadingImage}
+              />
+              {isUploadingImage && (
+                <p className="text-sm text-muted-foreground">
+                  Uploading image to Cloudinary...
+                </p>
+              )}
+              {uploadError && (
+                <p className="text-sm text-destructive">{uploadError}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
@@ -256,11 +333,11 @@ export function ClassForm({ isOpen, onClose, onSuccess, editingClass }: ClassFor
             </div>
           </div>
           <DialogFooter className="flex-shrink-0 p-6 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isUploadingImage}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Saving...' : (editingClass ? 'Update Class' : 'Create Class')}
+            <Button type="submit" disabled={isLoading || isUploadingImage}>
+              {isUploadingImage ? 'Uploading Image...' : isLoading ? 'Saving...' : (editingClass ? 'Update Class' : 'Create Class')}
             </Button>
           </DialogFooter>
         </form>

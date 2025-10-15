@@ -14,6 +14,7 @@ export interface CalendarClass {
   maxStudents: number;
   enrolled: number;
   classDuration: number;
+  image_url?: string | null;
 }
 
 export class CalendarClassesService {
@@ -99,7 +100,8 @@ export class CalendarClassesService {
       minStudents: clase.minStudents,
       maxStudents: clase.maxStudents,
       enrolled: clase.enrolled || 0,
-      classDuration: clase.classDuration
+      classDuration: clase.classDuration,
+      image_url: clase.image_url
     };
   }
 }

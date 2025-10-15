@@ -15,6 +15,7 @@ The `clases` table includes the following fields:
 - `maxStudents` (INTEGER) - Maximum students allowed
 - `price` (DECIMAL(10,2)) - Class price
 - `classDuration` (INTEGER) - Duration in minutes
+- `image_url` (TEXT) - URL or base64 string of the class image
 - `created_at` (TIMESTAMP) - Creation timestamp
 - `updated_at` (TIMESTAMP) - Last update timestamp
 
@@ -92,3 +93,22 @@ The table includes indexes on:
 ## Triggers
 
 An automatic trigger updates the `updated_at` timestamp whenever a record is modified.
+
+## Migrations
+
+### Adding Image URL Support
+
+If you already have the `clases` table created, you'll need to run the migration to add the `image_url` column:
+
+**Option 1: Manual SQL Execution (Recommended)**
+1. Go to your Supabase dashboard
+2. Navigate to the SQL Editor
+3. Copy and paste the contents of `add-image-url-to-clases.sql`
+4. Execute the SQL
+
+**Option 2: Using TypeScript Script**
+```bash
+npx tsx scripts/add-image-url-migration.ts
+```
+
+This migration adds support for uploading and storing images with cooking classes.
