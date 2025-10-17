@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     siteName: 'Cocinarte',
     images: [
       {
-        url: 'https://cocinartepdx.com/hero.png',
+        url: 'https://cocinartepdx.com/openGraphCocinarte.png',
         width: 1200,
         height: 630,
         alt: 'Cocinarte - Cooking Classes for Kids in Hillsboro, Oregon',
@@ -106,7 +106,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Cocinarte - Cooking Classes for Kids in Hillsboro, Oregon",
     description: "Cocinarte offers hands-on cooking classes for kids ages 5-12 in Hillsboro, Oregon. Learn to cook delicious Latin-inspired dishes while building confidence and life skills in a fun, safe environment.",
-    images: ['https://cocinartepdx.com/hero.png'],
+    images: ['https://cocinartepdx.com/openGraphCocinarte.png'],
     creator: '@cocinarte',
   },
   robots: {
@@ -147,26 +147,25 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Coming+Soon&display=swap" rel="stylesheet" />
         
         {/* Favicon Links */}
-        <link rel="icon" href="/favicon/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+        <link rel="icon" href="/cocinarte/cocinarteLogo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/cocinarte/cocinarteLogo.png" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
         
         {/* Additional favicon sizes */}
-        <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png" />
-        <link rel="icon" type="image/png" sizes="192x192" href="/favicon/web-app-manifest-192x192.png" />
-        <link rel="icon" type="image/png" sizes="512x512" href="/favicon/web-app-manifest-512x512.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/cocinarte/cocinarteLogo.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/cocinarte/cocinarteLogo.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/cocinarte/cocinarteLogo.png" />
         
         {/* Microsoft Tiles */}
         <meta name="msapplication-TileColor" content="#1e293b" />
-        <meta name="msapplication-TileImage" content="/favicon/favicon-96x96.png" />
+        <meta name="msapplication-TileImage" content="/cocinarte/cocinarteLogo.png" />
         
         {/* Theme Color */}
         <meta name="theme-color" content="#1e293b" />
         
         {/* Force Open Graph Image - Explicit Tags */}
-        <meta property="og:image" content="https://cocinartepdx.com/hero.png" />
-        <meta property="og:image:secure_url" content="https://cocinartepdx.com/hero.png" />
+        <meta property="og:image" content="https://cocinartepdx.com/openGraphCocinarte.png" />
+        <meta property="og:image:secure_url" content="https://cocinartepdx.com/openGraphCocinarte.png" />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -174,7 +173,7 @@ export default function RootLayout({
         
         {/* Twitter Card - Explicit Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://cocinartepdx.com/hero.png" />
+        <meta name="twitter:image" content="https://cocinartepdx.com/openGraphCocinarte.png" />
         <meta name="twitter:image:alt" content="Cocinarte - Cooking Classes for Kids in Hillsboro, Oregon" />
         
         {/* Additional Meta Tags */}
@@ -194,8 +193,8 @@ export default function RootLayout({
               "name": "Cocinarte",
               "description": "Cocinarte offers hands-on cooking classes for kids ages 5-12 in Hillsboro, Oregon. Learn to cook delicious Latin-inspired dishes while building confidence and life skills in a fun, safe environment.",
               "url": "https://cocinartepdx.com",
-              "logo": "https://cocinartepdx.com/hero.png",
-              "image": "https://cocinartepdx.com/hero.png",
+              "logo": "https://cocinartepdx.com/openGraphCocinarte.png",
+              "image": "https://cocinartepdx.com/openGraphCocinarte.png",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "770 NE Rogahn Street",

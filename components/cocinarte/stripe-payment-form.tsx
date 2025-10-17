@@ -88,7 +88,7 @@ export default function StripePaymentForm({
               Processing...
             </div>
           ) : (
-            `Pay $${amount}`
+            `Authorize $${amount} (Hold)`
           )}
         </Button>
       </div>
