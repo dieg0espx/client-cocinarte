@@ -18,11 +18,12 @@ export function ClassesClient({ initialClases }: ClassesClientProps) {
   const [showForm, setShowForm] = useState(false)
   const [editingClass, setEditingClass] = useState<Clase | null>(null)
 
-  // Debug: Check if we have classes
-  console.log('Classes loaded:', initialClases.length)
-  if (initialClases.length > 0) {
-    console.log('Sample class:', initialClases[0])
-  }
+  // Debug: Print all classes to console
+  console.log('=== ClassesClient Component Loaded ===')
+  console.log('Total classes loaded:', initialClases.length)
+  console.log('All classes (detailed):', initialClases)
+  console.log('All classes (JSON):', JSON.stringify(initialClases, null, 2))
+  console.log('=======================================')
 
   // Helper function to format date
   const formatDate = (dateString: string) => {

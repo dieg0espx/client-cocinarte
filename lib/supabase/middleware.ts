@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isAdminUser } from './admin'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -35,27 +36,55 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth') &&
-    !request.nextUrl.pathname.startsWith('/api') &&
-    request.nextUrl.pathname !== '/' &&
-    request.nextUrl.pathname !== '/about' &&
-    request.nextUrl.pathname !== '/admissions' &&
-    request.nextUrl.pathname !== '/calendar' &&
-    request.nextUrl.pathname !== '/camp-alegria' &&
-    request.nextUrl.pathname !== '/casita-azul' &&
-    request.nextUrl.pathname !== '/cocinarte' &&
-    request.nextUrl.pathname !== '/contact' &&
-    request.nextUrl.pathname !== '/faq' &&
-    request.nextUrl.pathname !== '/landing' &&
-    request.nextUrl.pathname !== '/programs' &&
-    request.nextUrl.pathname !== '/tuition'
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // List of public routes that don't require authentication
+  const publicRoutes = [
+    '/',
+    '/about',
+    '/admissions',
+    '/calendar',
+    '/camp-alegria',
+    '/casita-azul',
+    '/cocinarte',
+    '/contact',
+    '/faq',
+    '/landing',
+    '/login',
+    '/programs',
+    '/tuition',
+  ]
+
+  const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) ||
+    request.nextUrl.pathname.startsWith('/auth') ||
+    request.nextUrl.pathname.startsWith('/api')
+
+  // Admin-only routes (dashboard only, login is public)
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/dashboard')
+
+  // Check if user is trying to access admin routes
+  if (isAdminRoute) {
+    if (!user) {
+      // No user logged in, redirect to login page
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    // Check if user is an admin
+    const isAdmin = await isAdminUser(supabase, user.email)
+    
+    if (!isAdmin) {
+      // User is logged in but not an admin, redirect to home page
+      const url = request.nextUrl.clone()
+      url.pathname = '/'
+      url.searchParams.set('error', 'admin_only')
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Redirect non-authenticated users trying to access protected routes
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/'
     return NextResponse.redirect(url)
   }
 

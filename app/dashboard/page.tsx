@@ -5,6 +5,7 @@ import { BookingsClient } from '@/components/dashboard/bookings-client'
 import { DashboardStatsFallback } from '@/components/dashboard/dashboard-stats-fallback'
 import { RecentActivityFallback } from '@/components/dashboard/recent-activity-fallback'
 import { NavigationCardsFallback } from '@/components/dashboard/navigation-cards-fallback'
+import { isAdminUser } from '@/lib/supabase/admin'
 
 export default async function DashboardPage() {
   const supabase = createClient()
@@ -15,6 +16,13 @@ export default async function DashboardPage() {
 
   if (!user) {
     redirect('/login')
+  }
+
+  // Verify user is an admin
+  const isAdmin = await isAdminUser(supabase, user.email)
+  
+  if (!isAdmin) {
+    redirect('/?error=admin_only')
   }
 
   return (

@@ -32,7 +32,7 @@ export default function CocinarteAbout() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px] sm:gap-12 lg:gap-16 justify-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-16 lg:gap-[200px] justify-items-center">
           <FlipCard
             title="Hands-On Learning"
             description="Interactive cooking experiences where kids learn by doing"

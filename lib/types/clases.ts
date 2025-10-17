@@ -10,6 +10,7 @@ export interface Clase {
   price: number;
   classDuration: number; // duration in minutes
   class_type?: 'Mini Chefcitos' | 'Chefcitos Together' | 'Cocina Creativa'; // type of cooking class
+  image_url?: string | null; // URL to the class image
   created_at: string;
   updated_at: string;
 }
@@ -43,6 +44,7 @@ export interface CreateClaseData {
   price: number;
   classDuration: number;
   class_type?: 'Mini Chefcitos' | 'Chefcitos Together' | 'Cocina Creativa';
+  image_url?: string | null;
 }
 
 export interface UpdateClaseData extends Partial<CreateClaseData> {
