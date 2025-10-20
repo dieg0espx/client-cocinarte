@@ -1,32 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  // Log the start of the function execution
-  console.log('🚀 Vercel Cron Job Started');
-  console.log('Request headers:', Object.fromEntries(request.headers.entries()));
-  console.log('Environment check - CRON_SECRET exists:', !!process.env.CRON_SECRET);
+  const startTime = new Date();
+  const logs: string[] = [];
+  
+  // Helper function to add logs and console.log simultaneously
+  const addLog = (message: string) => {
+    console.log(message);
+    logs.push(message);
+  };
+
+  addLog(`🚀 Vercel Cron Job Started at ${startTime.toISOString()}`);
+  addLog(`Request User-Agent: ${request.headers.get('User-Agent') || 'Unknown'}`);
+  addLog(`CRON_SECRET exists: ${!!process.env.CRON_SECRET}`);
   
   try {
     // Check authorization header for cron secret
     const authHeader = request.headers.get('Authorization');
     const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
     
-    console.log('Auth header received:', authHeader ? 'Present' : 'Missing');
-    console.log('Expected auth format:', expectedAuth ? 'Set' : 'Not Set');
+    addLog(`Auth header: ${authHeader ? 'Present' : 'Missing'}`);
     
     if (!process.env.CRON_SECRET) {
-      console.error('❌ CRON_SECRET environment variable not set');
-      return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+      addLog('❌ CRON_SECRET environment variable not set');
+      return NextResponse.json({ 
+        error: 'Configuration error',
+        logs: logs
+      }, { status: 500 });
     }
     
     if (authHeader !== expectedAuth) {
-      console.error('❌ Unauthorized cron request');
-      console.error('Received:', authHeader);
-      console.error('Expected:', expectedAuth);
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      addLog('❌ Unauthorized cron request');
+      addLog(`Received: ${authHeader}`);
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        logs: logs
+      }, { status: 401 });
     }
 
-    console.log('✅ Authorization successful');
+    addLog('✅ Authorization successful');
 
     // Get current time
     const now = new Date();
@@ -45,30 +57,36 @@ export async function GET(request: NextRequest) {
       hour: '2-digit'
     });
 
-    // Multiple log statements to ensure visibility
-    console.log('⏰ Current timestamp:', timestamp);
-    console.log(`🕐 Current hour: ${hours}`);
-    console.log(`[${timestamp}] Current hour: ${hours}`);
-    console.log('✅ Cron job executed successfully');
+    // Multiple log statements with different formats
+    addLog(`⏰ Current timestamp: ${timestamp}`);
+    addLog(`🕐 Current hour: ${hours}`);
+    addLog(`[${timestamp}] Current hour: ${hours}`);
+    addLog('✅ Cron job executed successfully');
 
     const response = { 
       ok: true, 
       timestamp,
       hour: hours,
       message: 'Cron job executed successfully',
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      logs: logs,
+      executionTime: new Date().toISOString()
     };
 
-    console.log('📤 Returning response:', response);
+    addLog(`📤 Returning response with ${logs.length} log entries`);
 
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('❌ Error in cron job:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    addLog(`❌ Error in cron job: ${errorMsg}`);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }, 
-      { status: 500 }
-    );
+    
+    return NextResponse.json({
+      error: 'Internal server error', 
+      details: errorMsg,
+      logs: logs,
+      executionTime: new Date().toISOString()
+    }, { status: 500 });
   }
 }
