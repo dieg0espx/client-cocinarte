@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { createClient } from '@supabase/supabase-js';
 
+export const revalidate = 0;
+
 /**
  * Configure Supabase client
  */
