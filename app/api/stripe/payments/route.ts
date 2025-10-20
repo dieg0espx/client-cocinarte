@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { StripePaymentDetails, StripePaymentsListResponse } from '@/lib/types/stripe-payments';
 
+// Force dynamic rendering since this route uses searchParams
+export const dynamic = 'force-dynamic';
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-09-30.clover',
 });
 
 export async function GET(request: NextRequest) {
@@ -20,13 +23,16 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform Stripe payment intents to our format
-    const payments: StripePaymentDetails[] = await Promise.all(
-      paymentIntents.data.map(async (pi) => {
-        // Get charge details
-        const charges = pi.charges?.data || [];
+    const payments = await Promise.all(
+      paymentIntents.data.map(async (pi): Promise<StripePaymentDetails> => {
+        // Get charge details - cast to proper type when expanded
+        const expandedPi = pi as Stripe.PaymentIntent & {
+          charges?: Stripe.ApiList<Stripe.Charge>;
+        };
+        const charges = expandedPi.charges?.data || [];
         
         // Get balance transactions for fees
-        const chargesData = await Promise.all(charges.map(async (charge) => {
+        const chargesData = await Promise.all(charges.map(async (charge: Stripe.Charge) => {
           let fee = 0;
           let net = charge.amount;
           
@@ -66,12 +72,12 @@ export async function GET(request: NextRequest) {
             payment_method_details: charge.payment_method_details ? {
               type: charge.payment_method_details.type,
               card: charge.payment_method_details.card ? {
-                brand: charge.payment_method_details.card.brand,
-                last4: charge.payment_method_details.card.last4,
+                brand: charge.payment_method_details.card.brand || '',
+                last4: charge.payment_method_details.card.last4 || '',
                 exp_month: charge.payment_method_details.card.exp_month,
                 exp_year: charge.payment_method_details.card.exp_year,
                 country: charge.payment_method_details.card.country,
-                funding: charge.payment_method_details.card.funding,
+                funding: charge.payment_method_details.card.funding || '',
                 network: charge.payment_method_details.card.network,
               } : undefined,
             } : null,
@@ -82,13 +88,13 @@ export async function GET(request: NextRequest) {
         }));
 
         // Get refunds
-        const refundsData = charges.flatMap((charge) => 
-          (charge.refunds?.data || []).map((refund) => ({
+        const refundsData = charges.flatMap((charge: Stripe.Charge) => 
+          (charge.refunds?.data || []).map((refund: Stripe.Refund) => ({
             id: refund.id,
             amount: refund.amount,
             created: refund.created,
-            reason: refund.reason,
-            status: refund.status,
+            reason: refund.reason as string | null,
+            status: refund.status || '',
             receipt_number: refund.receipt_number,
           }))
         );
@@ -97,6 +103,9 @@ export async function GET(request: NextRequest) {
         const latestCharge = charges[0];
         const receiptUrl = latestCharge?.receipt_url || null;
         const customerEmail = latestCharge?.billing_details?.email || pi.receipt_email;
+
+        // Calculate total refunded amount from charges
+        const totalRefunded = charges.reduce((sum, charge) => sum + (charge.amount_refunded || 0), 0);
 
         return {
           id: pi.id,
@@ -116,7 +125,7 @@ export async function GET(request: NextRequest) {
           refunds: refundsData,
           latest_charge: pi.latest_charge as string | null,
           amount_capturable: pi.amount_capturable,
-          amount_refunded: pi.amount_refunded,
+          amount_refunded: totalRefunded,
           application_fee_amount: pi.application_fee_amount,
           cancellation_reason: pi.cancellation_reason,
           canceled_at: pi.canceled_at,

@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
 
+// Force dynamic rendering since this route uses headers
+export const dynamic = 'force-dynamic';
+
 /**
  * Configure Supabase client
  */
