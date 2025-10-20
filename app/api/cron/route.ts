@@ -174,7 +174,7 @@ async function sendStudentEmail(student: any, clase: any, timeString: string, ti
 }
 
 /**
- * Simple task that prints the current time every 5 minutes
+ * Simple task that prints the current time every minute
  */
 async function performTask() {
     const now = new Date();
@@ -205,9 +205,9 @@ async function performTask() {
     
     const timeString = `${hours}:${minutes}:${seconds}`;
     
-    // Print the current time every 5 minutes
+    // Print the current time every minute
     console.log(`[${timestamp}] Vercel Cron - Current time: ${hours}:${minutes}`);
-    console.log('✅ Cron job executed successfully every 5 minutes');
+    console.log('✅ Cron job executed successfully every minute');
     
     /* COMMENTED OUT - Original email functionality (ready to uncomment when needed)
     try {
@@ -265,7 +265,7 @@ export async function GET(request: NextRequest) {
   }
 
   console.log('=====================================');
-  console.log('Starting Vercel cron job - every 5 minutes...');
+  console.log('Starting Vercel cron job - every minute...');
   
   try {
     await performTask();
@@ -292,7 +292,7 @@ export async function GET(request: NextRequest) {
       ok: true, 
       timestamp,
       hour: hours,
-      message: 'Vercel cron job executed successfully - every 5 minutes',
+      message: 'Vercel cron job executed successfully - every minute',
       environment: process.env.NODE_ENV || 'development'
     });
 
