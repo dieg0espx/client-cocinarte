@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const revalidate = 0;
 
-// Force dynamic rendering for cron job
-export const dynamic = 'force-dynamic';
+// Dynamic rendering for cron job
+export const dynamic = 'auto';
 
 // MAIN CRON JOB - Simple Hello World function
 export async function GET(request: NextRequest) {
