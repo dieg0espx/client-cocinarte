@@ -175,8 +175,7 @@ async function sendStudentEmail(student, clase, timeString, timestamp) {
 }
 
 /**
- * This function will be executed every minute
- * Sends personalized emails to students enrolled in classes that aren't fully booked
+ * Simple task that prints the current hour every minute
  */
 async function performTask() {
     const now = new Date();
@@ -207,8 +206,10 @@ async function performTask() {
     
     const timeString = `${hours}:${minutes}:${seconds}`;
     
-    console.log(`[${timestamp}] Cron job executed!`);
+    // Print the hour each minute
+    console.log(`[${timestamp}] Current hour: ${hours}`);
     
+    /* COMMENTED OUT - Original email functionality
     try {
         // Fetch classes from Supabase
         console.log('Fetching classes from Supabase...');
@@ -245,16 +246,17 @@ async function performTask() {
     } catch (error) {
         console.error('❌ Error in cron job:', error);
     }
+    */
 }
 
-// Schedule the cron job to run twice a day at 9 AM and 5 PM
-// Cron pattern: 0 9,17 * * *
-// - 0: At minute 0 (start of the hour)
-// - 9,17: At 9 AM and 5 PM (17:00)
+// Schedule the cron job to run every minute
+// Cron pattern: * * * * *
+// - *: Every minute
+// - *: Every hour
 // - *: Every day of month
 // - *: Every month
 // - *: Every day of week
-const task = cron.schedule('0 9,17 * * *', async () => {
+const task = cron.schedule('* * * * *', async () => {
     console.log('=====================================');
     console.log('Starting scheduled task...');
     await performTask();
@@ -265,9 +267,8 @@ const task = cron.schedule('0 9,17 * * *', async () => {
 });
 
 console.log('🚀 Cron job scheduler started!');
-console.log('📧 Will send personalized emails to enrolled students');
-console.log('⏰ Task will run twice daily at 9:00 AM and 5:00 PM (Pacific Time - Hillsboro, Oregon)');
-console.log('📋 Only classes with available spots will be processed');
+console.log('⏰ Will print the current hour every minute');
+console.log('🌲 Timezone: Pacific Time (Hillsboro, Oregon)');
 console.log('🔄 Running first task immediately...\n');
 
 // Run the task immediately on startup
@@ -276,7 +277,7 @@ console.log('🔄 Running first task immediately...\n');
     console.log('Initial task execution...');
     await performTask();
     console.log('=====================================\n');
-    console.log('✅ Initial execution complete. Next run in 3 minutes.');
+    console.log('✅ Initial execution complete. Next run in 1 minute.');
     console.log('Press Ctrl+C to stop\n');
 })();
 
