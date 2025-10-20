@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
-import { createClient } from '@supabase/supabase-js';
+// COMMENTED OUT - Imports for complex functionality (ready to uncomment when needed)
+// import nodemailer from 'nodemailer';
+// import { createClient } from '@supabase/supabase-js';
 
 export const revalidate = 0;
 
+/* COMMENTED OUT - Configuration for complex functionality (ready to uncomment when needed)
 /**
  * Configure Supabase client
  */
+/*
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -15,6 +18,7 @@ const supabase = createClient(
 /**
  * Configure email transporter
  */
+/*
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
@@ -24,7 +28,9 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS
     }
 });
+*/
 
+/* COMMENTED OUT - All complex functionality (ready to uncomment when needed)
 /**
  * Fetch classes with enrollment status
  */
@@ -177,6 +183,8 @@ async function sendStudentEmail(student: any, clase: any, timeString: string, ti
  * Simple task that prints the current time every 5 minutes
  */
 async function performTask() {
+    console.log("🚀 Starting performTask() function");
+    
     const now = new Date();
     const timestamp = now.toLocaleString('en-US', { 
         timeZone: 'America/Los_Angeles',
@@ -206,10 +214,25 @@ async function performTask() {
     const timeString = `${hours}:${minutes}:${seconds}`;
     
     // Print the current time every 5 minutes
-    console.log(`[${timestamp}] Vercel Cron - Current time: ${hours}:${minutes}`);
+    console.log(`[${timestamp}] Vercel Cron - Current time: ${hours}:${minutes}:${seconds}`);
+    console.log(`📅 UTC Time: ${now.toISOString()}`);
     console.log('✅ Cron job executed successfully every 5 minutes');
     
-    /* COMMENTED OUT - Original email functionality (ready to uncomment when needed)
+    // Test database connection
+    try {
+        console.log("🔍 Testing Supabase connection...");
+        const { data, error } = await supabase.from('clases').select('count(*)').limit(1);
+        if (error) {
+            console.error("❌ Supabase connection error:", error);
+        } else {
+            console.log("✅ Supabase connection successful");
+        }
+    } catch (dbError) {
+        console.error("❌ Database test failed:", dbError);
+    }
+    
+    console.log("🏁 performTask() function completed");
+    
     try {
         // Fetch classes from Supabase
         console.log('Fetching classes from Supabase...');
@@ -246,16 +269,67 @@ async function performTask() {
     } catch (error) {
         console.error('❌ Error in cron job:', error);
     }
-    */
+}
+*/
+
+// ACTIVE SIMPLE VERSION (like in the image)
+export async function GET(request: NextRequest) {
+    console.log("Hello World - Cron job is working")
+    return NextResponse.json({message: "Hello World"}, {status: 200});
 }
 
+/* COMMENTED OUT - Complex GET function (ready to uncomment when needed)
 export async function GET(request: NextRequest) {
-    console.log("Hello World - Cron job is working");
+    console.log("🕐 Cron job triggered at:", new Date().toISOString());
+    console.log("🔍 Request headers:", Object.fromEntries(request.headers.entries()));
+    console.log("🌍 Environment:", process.env.NODE_ENV);
     
-    return NextResponse.json(
-        {
-            message: "Hello World"
-        },
-        { status: 200 }
-    );
+    // Check if required environment variables are present
+    const requiredEnvVars = [
+        'NEXT_PUBLIC_SUPABASE_URL',
+        'SUPABASE_SERVICE_ROLE_KEY',
+        'SMTP_HOST',
+        'SMTP_USER',
+        'SMTP_PASS'
+    ];
+    
+    const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+    if (missingEnvVars.length > 0) {
+        console.error("❌ Missing environment variables:", missingEnvVars);
+        return NextResponse.json(
+            {
+                message: "Configuration error",
+                missingEnvVars: missingEnvVars
+            },
+            { status: 500 }
+        );
+    }
+    
+    try {
+        // Call the actual task
+        await performTask();
+        
+        console.log("✅ Cron job completed successfully");
+        return NextResponse.json(
+            {
+                message: "Cron job executed successfully",
+                timestamp: new Date().toISOString(),
+                environment: process.env.NODE_ENV
+            },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("❌ Cron job failed:", error);
+        
+        return NextResponse.json(
+            {
+                message: "Cron job failed",
+                error: error instanceof Error ? error.message : "Unknown error",
+                timestamp: new Date().toISOString(),
+                environment: process.env.NODE_ENV
+            },
+            { status: 500 }
+        );
+    }
 }
+*/
