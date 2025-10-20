@@ -264,9 +264,13 @@ async function sendClassCancellationEmail(student, clase) {
                         <p>📅 Was scheduled for: ${classDate} at ${clase.time}</p>
                         <p>👥 Enrollment: ${clase.enrolled}/${clase.maxStudents} (minimum not reached)</p>
                     </div>
-                    <p>💚 <strong>Good news:</strong> Your card was NOT charged. The payment authorization has been released.</p>
-                    <p>We hope to see ${childName} in a future class!</p>
-                    <p>Browse other classes at: <a href="https://cocinartepdx.com">cocinartepdx.com</a></p>
+                    <div style="background: #d4edda; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745;">
+                        <h3 style="margin-top: 0; color: #155724;">💚 Payment Information</h3>
+                        <p style="color: #155724; margin: 10px 0;"><strong>Your card was NOT charged.</strong></p>
+                        <p style="color: #155724; margin: 10px 0;">The payment authorization has been completely released, and you will not see any charge on your statement.</p>
+                    </div>
+                    <p>We apologize for any inconvenience and hope to see ${childName} in a future class!</p>
+                    <p>Browse other available classes at: <a href="https://cocinartepdx.com">cocinartepdx.com</a></p>
                 </div>
             </div>
         `
@@ -473,6 +477,39 @@ async function processClassesStartingTomorrow() {
 }
 
 /**
+ * Update ALL booking statuses for a class
+ */
+async function updateAllBookingStatuses(classId, paymentStatus, bookingStatus, notes = null) {
+    try {
+        const updateData = {
+            payment_status: paymentStatus,
+            booking_status: bookingStatus
+        };
+        
+        if (notes) {
+            updateData.notes = notes;
+        }
+
+        const { error } = await supabase
+            .from('bookings')
+            .update(updateData)
+            .eq('class_id', classId)
+            .in('booking_status', ['confirmed', 'pending']);
+
+        if (error) {
+            console.error('Error updating booking statuses:', error);
+            return false;
+        }
+
+        console.log(`  ✅ Updated all booking statuses to: ${bookingStatus}`);
+        return true;
+    } catch (error) {
+        console.error('Error in updateAllBookingStatuses:', error);
+        return false;
+    }
+}
+
+/**
  * Process a class completely - send emails AND process payments
  */
 async function processClassComplete(clase) {
@@ -500,14 +537,27 @@ async function processClassComplete(clase) {
     let paymentsCanceled = 0;
     let paymentsFailed = 0;
 
-    // Process each student
+    // STEP 1: Update ALL booking statuses based on minimum enrollment
+    if (hasMinimum) {
+        // Class confirmed - update all bookings to confirmed
+        await updateAllBookingStatuses(clase.id, 'completed', 'confirmed');
+    } else {
+        // Class cancelled - update all bookings to cancelled
+        await updateAllBookingStatuses(
+            clase.id, 
+            'canceled', 
+            'cancelled', 
+            'Class cancelled - did not reach minimum enrollment'
+        );
+    }
+
+    // STEP 2: Send emails to all students
     for (const student of allStudents) {
         const childName = student.students?.child_name || 'Student';
         const email = student.students?.email;
         
         console.log(`\n   👤 Student: ${childName} (${email})`);
 
-        // STEP 1: Send Email
         if (hasMinimum) {
             const success = await sendClassConfirmationEmail(student, clase);
             if (success) emailsConfirmed++;
@@ -515,32 +565,36 @@ async function processClassComplete(clase) {
             const success = await sendClassCancellationEmail(student, clase);
             if (success) emailsCancelled++;
         }
+    }
 
-        // STEP 2: Process Payment (if this student has a held payment)
-        const heldBooking = heldBookings.find(b => b.student_id === student.students.id);
-        if (heldBooking && heldBooking.stripe_payment_intent_id) {
-            if (hasMinimum) {
-                // Capture payment
-                const success = await capturePayment(
-                    heldBooking.stripe_payment_intent_id,
-                    heldBooking.id
-                );
-                if (success) {
-                    paymentsCaptured++;
-                } else {
-                    paymentsFailed++;
-                }
+    // STEP 3: Process payments for held bookings
+    for (const heldBooking of heldBookings) {
+        const studentName = heldBooking.students?.child_name || 'Unknown Student';
+        const parentEmail = heldBooking.students?.email || 'No email';
+        
+        console.log(`\n   💳 Processing payment for: ${studentName} (${parentEmail})`);
+
+        if (hasMinimum) {
+            // Capture payment
+            const success = await capturePayment(
+                heldBooking.stripe_payment_intent_id,
+                heldBooking.id
+            );
+            if (success) {
+                paymentsCaptured++;
             } else {
-                // Cancel authorization
-                const success = await cancelPaymentAuthorization(
-                    heldBooking.stripe_payment_intent_id,
-                    heldBooking.id
-                );
-                if (success) {
-                    paymentsCanceled++;
-                } else {
-                    paymentsFailed++;
-                }
+                paymentsFailed++;
+            }
+        } else {
+            // Cancel authorization
+            const success = await cancelPaymentAuthorization(
+                heldBooking.stripe_payment_intent_id,
+                heldBooking.id
+            );
+            if (success) {
+                paymentsCanceled++;
+            } else {
+                paymentsFailed++;
             }
         }
     }
