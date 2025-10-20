@@ -172,7 +172,7 @@ async function sendStudentEmail(student: any, clase: any, timeString: string, ti
 }
 
 /**
- * Simple task that prints the current hour every minute (from class-availability-notifier.js)
+ * Simple task that prints the current time every 5 minutes
  */
 async function performTask() {
     const now = new Date();
@@ -203,10 +203,11 @@ async function performTask() {
     
     const timeString = `${hours}:${minutes}:${seconds}`;
     
-    // Print the hour each minute
-    console.log(`[${timestamp}] Current hour: ${hours}`);
+    // Print the current time every 5 minutes
+    console.log(`[${timestamp}] Vercel Cron - Current time: ${hours}:${minutes}`);
+    console.log('✅ Cron job executed successfully every 5 minutes');
     
-    /* COMMENTED OUT - Original email functionality
+    /* COMMENTED OUT - Original email functionality (ready to uncomment when needed)
     try {
         // Fetch classes from Supabase
         console.log('Fetching classes from Supabase...');
@@ -262,7 +263,7 @@ export async function GET(request: NextRequest) {
   }
 
   console.log('=====================================');
-  console.log('Starting scheduled task from class-availability-notifier...');
+  console.log('Starting Vercel cron job - every 5 minutes...');
   
   try {
     await performTask();
@@ -289,7 +290,7 @@ export async function GET(request: NextRequest) {
       ok: true, 
       timestamp,
       hour: hours,
-      message: 'Cron job executed successfully from class-availability-notifier',
+      message: 'Vercel cron job executed successfully - every 5 minutes',
       environment: process.env.NODE_ENV || 'development'
     });
 

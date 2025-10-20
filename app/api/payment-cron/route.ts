@@ -1,22 +1,20 @@
-const cron = require('node-cron');
-const { createClient } = require('@supabase/supabase-js');
-const Stripe = require('stripe');
-const nodemailer = require('nodemailer');
-const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env.local') });
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
+import nodemailer from 'nodemailer';
 
 /**
  * Configure Supabase client
  */
 const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 /**
  * Configure Stripe client
  */
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2024-12-18.acacia',
 });
 
@@ -108,7 +106,7 @@ async function fetchClassesStartingTomorrow() {
 /**
  * Fetch bookings for a specific class with payment status 'held'
  */
-async function fetchHeldBookingsForClass(classId) {
+async function fetchHeldBookingsForClass(classId: string) {
     try {
         const { data, error } = await supabase
             .from('bookings')
@@ -146,7 +144,7 @@ async function fetchHeldBookingsForClass(classId) {
 /**
  * Fetch ALL enrolled students for a specific class (any payment/booking status)
  */
-async function fetchAllEnrolledStudents(classId) {
+async function fetchAllEnrolledStudents(classId: string) {
     try {
         const { data, error } = await supabase
             .from('bookings')
@@ -169,7 +167,7 @@ async function fetchAllEnrolledStudents(classId) {
             return [];
         }
 
-        return (data || []).filter(booking => booking.students);
+        return (data || []).filter((booking: any) => booking.students);
     } catch (error) {
         console.error('Error in fetchAllEnrolledStudents:', error);
         return [];
@@ -179,7 +177,7 @@ async function fetchAllEnrolledStudents(classId) {
 /**
  * Send class confirmation email (class will happen)
  */
-async function sendClassConfirmationEmail(student, clase) {
+async function sendClassConfirmationEmail(student: any, clase: any) {
     const parentName = student.students.parent_name || 'Parent';
     const childName = student.students.child_name || 'your child';
     const email = student.students.email;
@@ -223,7 +221,7 @@ async function sendClassConfirmationEmail(student, clase) {
         await transporter.sendMail(mailOptions);
         console.log(`  ✅ Confirmation sent to ${email}`);
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error(`  ❌ Error sending to ${email}:`, error.message);
         return false;
     }
@@ -232,7 +230,7 @@ async function sendClassConfirmationEmail(student, clase) {
 /**
  * Send class cancellation email (didn't reach minimum)
  */
-async function sendClassCancellationEmail(student, clase) {
+async function sendClassCancellationEmail(student: any, clase: any) {
     const parentName = student.students.parent_name || 'Parent';
     const childName = student.students.child_name || 'your child';
     const email = student.students.email;
@@ -280,7 +278,7 @@ async function sendClassCancellationEmail(student, clase) {
         await transporter.sendMail(mailOptions);
         console.log(`  ✅ Cancellation sent to ${email}`);
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error(`  ❌ Error sending to ${email}:`, error.message);
         return false;
     }
@@ -289,7 +287,7 @@ async function sendClassCancellationEmail(student, clase) {
 /**
  * Capture a held payment (charge the customer)
  */
-async function capturePayment(paymentIntentId, bookingId) {
+async function capturePayment(paymentIntentId: string, bookingId: string) {
     try {
         console.log(`  📤 Attempting to capture payment: ${paymentIntentId}`);
         
@@ -311,7 +309,7 @@ async function capturePayment(paymentIntentId, bookingId) {
             console.log(`  ⚠️ Payment status: ${paymentIntent.status}`);
             return false;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error(`  ❌ Error capturing payment:`, error.message);
         return false;
     }
@@ -320,7 +318,7 @@ async function capturePayment(paymentIntentId, bookingId) {
 /**
  * Cancel a held payment authorization (release the hold)
  */
-async function cancelPaymentAuthorization(paymentIntentId, bookingId) {
+async function cancelPaymentAuthorization(paymentIntentId: string, bookingId: string) {
     try {
         console.log(`  🚫 Attempting to cancel payment authorization: ${paymentIntentId}`);
         
@@ -343,145 +341,18 @@ async function cancelPaymentAuthorization(paymentIntentId, bookingId) {
             console.log(`  ⚠️ Payment status: ${paymentIntent.status}`);
             return false;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error(`  ❌ Error canceling payment:`, error.message);
         return false;
     }
 }
 
 /**
- * Process a class: capture payments if fully booked, cancel if not
- */
-async function processClass(clase) {
-    const classTitle = clase.title || 'Unknown Class';
-    const enrolled = clase.enrolled || 0;
-    const maxStudents = clase.maxStudents || 0;
-    const isFullyBooked = enrolled >= maxStudents;
-
-    console.log(`\n📚 Processing class: ${classTitle}`);
-    console.log(`   Enrollment: ${enrolled}/${maxStudents} students`);
-    console.log(`   Status: ${isFullyBooked ? '✅ FULLY BOOKED' : '⚠️ NOT FULLY BOOKED'}`);
-
-    // Fetch all held bookings for this class
-    const heldBookings = await fetchHeldBookingsForClass(clase.id);
-    console.log(`   Found ${heldBookings.length} held payments`);
-
-    if (heldBookings.length === 0) {
-        console.log(`   ℹ️ No held payments to process`);
-        return {
-            classTitle,
-            captured: 0,
-            canceled: 0,
-            failed: 0
-        };
-    }
-
-    let capturedCount = 0;
-    let canceledCount = 0;
-    let failedCount = 0;
-
-    for (const booking of heldBookings) {
-        const studentName = booking.students?.child_name || 'Unknown Student';
-        const parentEmail = booking.students?.email || 'No email';
-        
-        console.log(`\n   👤 Student: ${studentName} (${parentEmail})`);
-
-        if (isFullyBooked) {
-            // Class is fully booked - CAPTURE the payment
-            const success = await capturePayment(
-                booking.stripe_payment_intent_id,
-                booking.id
-            );
-            if (success) {
-                capturedCount++;
-            } else {
-                failedCount++;
-            }
-        } else {
-            // Class is NOT fully booked - CANCEL the authorization
-            const success = await cancelPaymentAuthorization(
-                booking.stripe_payment_intent_id,
-                booking.id
-            );
-            if (success) {
-                canceledCount++;
-            } else {
-                failedCount++;
-            }
-        }
-    }
-
-    return {
-        classTitle,
-        captured: capturedCount,
-        canceled: canceledCount,
-        failed: failedCount
-    };
-}
-
-/**
- * Process classes starting tomorrow - send reminder emails
- */
-async function processClassesStartingTomorrow() {
-    console.log('\n📧 Checking for classes starting tomorrow (24 hours)...');
-    const tomorrowClasses = await fetchClassesStartingTomorrow();
-    console.log(`📋 Found ${tomorrowClasses.length} classes starting tomorrow`);
-    
-    if (tomorrowClasses.length === 0) {
-        console.log('✅ No classes starting tomorrow');
-        return;
-    }
-
-    let confirmationsSent = 0;
-    let cancellationsSent = 0;
-
-    for (const clase of tomorrowClasses) {
-        const classTitle = clase.title || 'Unknown Class';
-        const enrolled = clase.enrolled || 0;
-        const minStudents = clase.minStudents || 0;
-        const hasMinimum = enrolled >= minStudents;
-
-        console.log(`\n📚 Processing: ${classTitle}`);
-        console.log(`   Enrollment: ${enrolled}/${clase.maxStudents} (min: ${minStudents})`);
-        console.log(`   Status: ${hasMinimum ? '✅ WILL PROCEED' : '❌ WILL BE CANCELLED'}`);
-
-        // Fetch all enrolled students
-        const students = await fetchAllEnrolledStudents(clase.id);
-        console.log(`   Found ${students.length} enrolled students`);
-
-        if (students.length === 0) {
-            console.log(`   ℹ️ No students to email`);
-            continue;
-        }
-
-        // Send appropriate email to each student
-        for (const student of students) {
-            const childName = student.students?.child_name || 'Student';
-            console.log(`\n   👤 ${childName}`);
-
-            if (hasMinimum) {
-                // Class will happen - send confirmation
-                const success = await sendClassConfirmationEmail(student, clase);
-                if (success) confirmationsSent++;
-            } else {
-                // Class cancelled - send cancellation
-                const success = await sendClassCancellationEmail(student, clase);
-                if (success) cancellationsSent++;
-            }
-        }
-    }
-
-    console.log(`\n📧 Tomorrow's Class Emails:`);
-    console.log(`   ✅ Confirmations sent: ${confirmationsSent}`);
-    console.log(`   ❌ Cancellations sent: ${cancellationsSent}`);
-}
-
-/**
  * Update ALL booking statuses for a class
  */
-async function updateAllBookingStatuses(classId, paymentStatus, bookingStatus, notes = null) {
+async function updateAllBookingStatuses(classId: string, paymentStatus: string, bookingStatus: string, notes: string | null = null) {
     try {
-        const updateData = {
+        const updateData: any = {
             payment_status: paymentStatus,
             booking_status: bookingStatus
         };
@@ -512,7 +383,7 @@ async function updateAllBookingStatuses(classId, paymentStatus, bookingStatus, n
 /**
  * Process a class completely - send emails AND process payments
  */
-async function processClassComplete(clase) {
+async function processClassComplete(clase: any) {
     const classTitle = clase.title || 'Unknown Class';
     const enrolled = clase.enrolled || 0;
     const minStudents = clase.minStudents || 0;
@@ -611,7 +482,7 @@ async function processClassComplete(clase) {
 }
 
 /**
- * Main task - checks classes starting in 24 hours and processes everything
+ * Main task - checks classes starting in 24 hours and processes everything (from payment-capture-handler.js)
  */
 async function performPaymentProcessingTask() {
     const now = new Date();
@@ -637,7 +508,7 @@ async function performPaymentProcessingTask() {
         if (classes.length === 0) {
             console.log('✅ No classes to process at this time');
             console.log('='.repeat(80));
-            return;
+            return { message: 'No classes to process', classesProcessed: 0 };
         }
 
         const results = [];
@@ -677,47 +548,66 @@ async function performPaymentProcessingTask() {
         });
 
         console.log('\n' + '='.repeat(80));
+
+        return {
+            message: 'Payment processing completed',
+            classesProcessed: classes.length,
+            results
+        };
         
     } catch (error) {
         console.error('❌ Error in class processing cron job:', error);
+        throw error;
     }
 }
 
-// Schedule the cron job to run every hour
-// This way we catch classes in the 24-hour window multiple times
-// Cron pattern: 0 * * * *
-// - 0: At minute 0 (start of every hour)
-// - *: Every hour
-// - *: Every day of month
-// - *: Every month
-// - *: Every day of week
-const task = cron.schedule('0 * * * *', async () => {
-    await performPaymentProcessingTask();
-}, {
-    scheduled: true,
-    timezone: process.env.TIMEZONE || "America/Los_Angeles"
-});
+export async function GET(request: NextRequest) {
+  // Check authorization header for cron secret
+  const authHeader = request.headers.get('Authorization');
+  const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
+  
+  if (!process.env.CRON_SECRET) {
+    console.error('❌ CRON_SECRET environment variable not set');
+    return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
+  }
+  
+  if (authHeader !== expectedAuth) {
+    console.error('❌ Unauthorized cron request');
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-console.log('🚀 Class Processing Cron Job Started!');
-console.log('⏰ Checks every hour for classes starting in 24 hours');
-console.log('📧 Sends confirmation/cancellation emails to enrolled students');
-console.log('💳 Processes payments (capture or cancel)');
-console.log('   ✅ Classes with minimum enrollment → Emails + Charge payments');
-console.log('   ❌ Classes below minimum → Emails + Release payment holds');
-console.log('🌲 Timezone: Pacific Time (Hillsboro, Oregon)');
-console.log('Press Ctrl+C to stop\n');
+  console.log('=====================================');
+  console.log('Starting payment processing task from payment-capture-handler...');
+  
+  try {
+    const result = await performPaymentProcessingTask();
+    
+    const now = new Date();
+    const timestamp = now.toLocaleString('en-US', { 
+      timeZone: 'America/Los_Angeles',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
 
-// Run immediately on startup for testing
-console.log('🔄 Running initial check...\n');
-performPaymentProcessingTask().then(() => {
-    console.log('\n✅ Initial check complete. Next run at the top of the hour.');
-});
+    console.log('=====================================');
+    
+    return NextResponse.json({ 
+      ok: true, 
+      timestamp,
+      message: 'Payment processing cron job executed successfully from payment-capture-handler',
+      result,
+      environment: process.env.NODE_ENV || 'development'
+    });
 
-// Keep the process running
-process.on('SIGINT', () => {
-    console.log('\n\n🛑 Stopping payment processing cron job...');
-    task.stop();
-    console.log('✅ Cron job stopped successfully');
-    process.exit(0);
-});
-
+  } catch (error) {
+    console.error('❌ Error in payment processing cron job:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }, 
+      { status: 500 }
+    );
+  }
+}
