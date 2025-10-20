@@ -165,6 +165,9 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
               amount: selectedClassData.price,
               classTitle: selectedClassData.title,
               userName: childName,
+              classId: selectedClassData.id,
+              classDate: selectedClassData.date,
+              classTime: selectedClassData.time,
             }),
           })
 
@@ -342,7 +345,7 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
         return
       }
 
-      // Create booking record
+      // Create booking record with payment on HOLD (not charged yet)
       const bookingsService = new BookingsClientService()
       const newBooking = await bookingsService.createBooking({
         user_id: user.id!,
@@ -350,9 +353,9 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
         student_id: studentInfo.id,
         payment_amount: selectedClassData.price,
         payment_method: 'stripe',
-        // TODO: Uncomment after adding column to database and refreshing schema cache
-        // stripe_payment_intent_id: paymentIntentId,
-        notes: `Booking for ${selectedClassData.title} on ${formatDate(selectedClassData.date)} at ${formatTime(selectedClassData.time)}. Payment Intent: ${paymentIntentId}`
+        payment_status: 'held',
+        stripe_payment_intent_id: paymentIntentId,
+        notes: `Booking for ${selectedClassData.title} on ${formatDate(selectedClassData.date)} at ${formatTime(selectedClassData.time)}. Payment is on HOLD and will be charged 24 hours before class if minimum enrollment is reached.`
       })
 
       // Update enrolled count in the class
@@ -1003,6 +1006,33 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col flex-1">
+              {/* Payment Hold Notice */}
+              <Alert className="mb-6 border-blue-200 bg-blue-50">
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-1">
+                      Payment Authorization (Not a Charge)
+                    </h4>
+                    <div className="text-sm text-blue-700 space-y-1">
+                      <p className="font-medium">
+                        Your card will be <strong>authorized</strong> but <strong>NOT charged</strong> immediately.
+                      </p>
+                      <ul className="list-disc list-inside space-y-1 mt-2 text-xs">
+                        <li>We'll place a <strong>temporary hold</strong> on your card for ${selectedClassData?.price}</li>
+                        <li><strong>You'll only be charged</strong> if the class reaches minimum enrollment 24 hours before start time</li>
+                        <li><strong>If the class doesn't fill up</strong>, the hold will be released and you <strong>won't be charged</strong></li>
+                        <li>The hold may appear as "pending" on your card statement</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </Alert>
+
               {!clientSecret ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cocinarte-navy"></div>
@@ -1042,6 +1072,31 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
           Your cooking class has been successfully booked. You will receive a confirmation email shortly.
         </p>
       </div>
+
+      {/* Payment Hold Reminder */}
+      <Alert className="border-blue-200 bg-blue-50">
+        <div className="flex gap-3">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h4 className="text-sm font-semibold text-blue-800 mb-1">
+              Payment Status: Authorized (On Hold)
+            </h4>
+            <div className="text-xs text-blue-700 space-y-1">
+              <p>Your payment of <strong>${selectedClassData?.price}</strong> is currently on hold and <strong>NOT yet charged</strong>.</p>
+              <p className="mt-2">
+                <strong>You will only be charged if:</strong> The class reaches minimum enrollment 24 hours before the start time.
+              </p>
+              <p>
+                <strong>If the class doesn't fill up:</strong> The hold will be released automatically and you won't be charged.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Alert>
 
       {/* User Information */}
       {user && (
