@@ -2,29 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const revalidate = 0;
 
-// Dynamic rendering for cron job
-export const dynamic = 'auto';
-
-// MAIN CRON JOB - Simple Hello World function
-export async function GET(request: NextRequest) {
-    try {
-        console.log("Hello World - Cron job is working");
-        
-        // Add timestamp for debugging
-        const timestamp = new Date().toISOString();
-        console.log(`Cron executed at: ${timestamp}`);
-        
-        return NextResponse.json({
-            message: "Hello World", 
-            timestamp,
-            status: "success"
-        }, {status: 200});
-    } catch (error) {
-        console.error("Cron job error:", error);
-        return NextResponse.json({
-            error: "Cron job failed",
-            message: error instanceof Error ? error.message : "Unknown error"
-        }, {status: 500});
-    }
+const GET = async (request: NextRequest) => {
+    console.log("Hello World - Cron job is working");
+    return NextResponse.json({ message: "Hello World" }, {status: 200});
 }
-
