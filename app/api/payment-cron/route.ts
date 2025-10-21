@@ -73,7 +73,7 @@ async function fetchClassesStartingSoon() {
 
 /**
  * Fetch classes that start in approximately 24 hours (1 day)
- * We check classes between 23.5 and 24.5 hours from now
+ * We check classes between 23.5 and 24.5 hours from now (Los Angeles time)
  */
 async function fetchClassesStartingTomorrow() {
     try {
@@ -81,12 +81,33 @@ async function fetchClassesStartingTomorrow() {
         const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
         const twentyThreeHalfHoursFromNow = new Date(now.getTime() + 23.5 * 60 * 60 * 1000);
         
-        // Convert to ISO date strings (YYYY-MM-DD)
-        const targetDate = twentyFourHoursFromNow.toISOString().split('T')[0];
+        // Convert to Los Angeles timezone date string (YYYY-MM-DD)
+        const dateParts = twentyFourHoursFromNow.toLocaleDateString('en-US', {
+            timeZone: 'America/Los_Angeles',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).split('/'); // Returns [MM, DD, YYYY]
+        const targetDate = `${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`; // Convert to YYYY-MM-DD
         
-        // Get target time in HH:MM:SS format
-        const targetTimeStart = twentyThreeHalfHoursFromNow.toTimeString().split(' ')[0];
-        const targetTimeEnd = twentyFourHoursFromNow.toTimeString().split(' ')[0];
+        // Get target time in HH:MM:SS format (LA timezone)
+        const targetTimeStart = twentyThreeHalfHoursFromNow.toLocaleTimeString('en-US', {
+            timeZone: 'America/Los_Angeles',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        
+        const targetTimeEnd = twentyFourHoursFromNow.toLocaleTimeString('en-US', {
+            timeZone: 'America/Los_Angeles',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        console.log(`   🔍 Looking for classes on ${targetDate} between ${targetTimeStart} and ${targetTimeEnd} (LA time)`);
 
         const { data, error } = await supabase
             .from('clases')
