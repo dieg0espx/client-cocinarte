@@ -502,9 +502,9 @@ async function performPaymentProcessingTask() {
         second: '2-digit'
     });
     
-    console.log(`\n[${timestamp}] 🕐 Hourly Booking Check - Cron Job Executed!`);
+    console.log(`\n[${timestamp}] 🕐 Booking Check - Cron Job Executed!`);
     console.log('='.repeat(80));
-    console.log('⏰ Running scheduled hourly check for bookings 24 hours before class');
+    console.log('⏰ Running scheduled check (every 5 minutes) for bookings 24 hours before class');
     
     try {
         // Check for classes starting in 24 hours (tomorrow)
@@ -514,7 +514,7 @@ async function performPaymentProcessingTask() {
         
         if (classes.length === 0) {
             console.log('✅ No classes to process at this time - all clear!');
-            console.log('📌 Next check will run in 1 hour');
+            console.log('📌 Next check will run in 5 minutes');
             console.log('='.repeat(80));
             return { message: 'No classes to process', classesProcessed: 0 };
         }
@@ -556,8 +556,8 @@ async function performPaymentProcessingTask() {
         });
 
         console.log('\n' + '='.repeat(80));
-        console.log('✅ Hourly booking check completed successfully');
-        console.log('📌 Next check will run in 1 hour');
+        console.log('✅ Booking check completed successfully');
+        console.log('📌 Next check will run in 5 minutes');
         console.log('='.repeat(80));
 
         return {

@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/payment-cron",
-      "schedule": "0 * * * *"
+      "schedule": "*/5 * * * *"
     }
   ]
 }
