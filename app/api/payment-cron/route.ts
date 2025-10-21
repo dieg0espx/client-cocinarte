@@ -3,8 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import nodemailer from 'nodemailer';
 
-// Force dynamic rendering since this route uses headers
+// Force dynamic rendering for cron job
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 /**
  * Configure Supabase client
@@ -191,6 +192,7 @@ async function sendClassConfirmationEmail(student: any, clase: any) {
     }
 
     const classDate = new Date(clase.date).toLocaleDateString('en-US', { 
+        timeZone: 'America/Los_Angeles',
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
     
@@ -244,6 +246,7 @@ async function sendClassCancellationEmail(student: any, clase: any) {
     }
 
     const classDate = new Date(clase.date).toLocaleDateString('en-US', { 
+        timeZone: 'America/Los_Angeles',
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
     });
     
@@ -427,8 +430,8 @@ async function processClassComplete(clase: any) {
 
     // STEP 2: Send emails to all students
     for (const student of allStudents) {
-        const childName = student.students?.child_name || 'Student';
-        const email = student.students?.email;
+        const childName = (student.students as any)?.child_name || 'Student';
+        const email = (student.students as any)?.email;
         
         console.log(`\n   👤 Student: ${childName} (${email})`);
 
@@ -443,8 +446,8 @@ async function processClassComplete(clase: any) {
 
     // STEP 3: Process payments for held bookings
     for (const heldBooking of heldBookings) {
-        const studentName = heldBooking.students?.child_name || 'Unknown Student';
-        const parentEmail = heldBooking.students?.email || 'No email';
+        const studentName = (heldBooking.students as any)?.child_name || 'Unknown Student';
+        const parentEmail = (heldBooking.students as any)?.email || 'No email';
         
         console.log(`\n   💳 Processing payment for: ${studentName} (${parentEmail})`);
 
@@ -499,17 +502,19 @@ async function performPaymentProcessingTask() {
         second: '2-digit'
     });
     
-    console.log(`\n[${timestamp}] Class Processing Cron Job Executed!`);
+    console.log(`\n[${timestamp}] 🕐 Hourly Booking Check - Cron Job Executed!`);
     console.log('='.repeat(80));
+    console.log('⏰ Running scheduled hourly check for bookings 24 hours before class');
     
     try {
         // Check for classes starting in 24 hours (tomorrow)
         console.log('\n🔍 Checking for classes starting in 24 hours...');
         const classes = await fetchClassesStartingTomorrow();
-        console.log(`📋 Found ${classes.length} classes starting tomorrow`);
+        console.log(`📋 Found ${classes.length} classes starting tomorrow that need processing`);
         
         if (classes.length === 0) {
-            console.log('✅ No classes to process at this time');
+            console.log('✅ No classes to process at this time - all clear!');
+            console.log('📌 Next check will run in 1 hour');
             console.log('='.repeat(80));
             return { message: 'No classes to process', classesProcessed: 0 };
         }
@@ -551,6 +556,9 @@ async function performPaymentProcessingTask() {
         });
 
         console.log('\n' + '='.repeat(80));
+        console.log('✅ Hourly booking check completed successfully');
+        console.log('📌 Next check will run in 1 hour');
+        console.log('='.repeat(80));
 
         return {
             message: 'Payment processing completed',
@@ -565,52 +573,35 @@ async function performPaymentProcessingTask() {
 }
 
 export async function GET(request: NextRequest) {
-  // Check authorization header for cron secret
-  const authHeader = request.headers.get('Authorization');
-  const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
-  
-  if (!process.env.CRON_SECRET) {
-    console.error('❌ CRON_SECRET environment variable not set');
-    return NextResponse.json({ error: 'Configuration error' }, { status: 500 });
-  }
-  
-  if (authHeader !== expectedAuth) {
-    console.error('❌ Unauthorized cron request');
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  console.log('=====================================');
-  console.log('Starting payment processing task from payment-capture-handler...');
-  
   try {
-    const result = await performPaymentProcessingTask();
+    console.log("Payment processing cron job started...");
     
-    const now = new Date();
-    const timestamp = now.toLocaleString('en-US', { 
+    const timestamp = new Date().toLocaleString('en-US', { 
       timeZone: 'America/Los_Angeles',
       year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
     });
-
-    console.log('=====================================');
+    console.log(`Cron executed at (LA time): ${timestamp}`);
     
-    return NextResponse.json({ 
-      ok: true, 
+    // Execute payment processing task
+    const result = await performPaymentProcessingTask();
+    
+    return NextResponse.json({
+      message: "Payment processing cron job executed successfully", 
       timestamp,
-      message: 'Payment processing cron job executed successfully from payment-capture-handler',
-      result,
-      environment: process.env.NODE_ENV || 'development'
-    });
-
+      status: "success",
+      result
+    }, {status: 200});
+    
   } catch (error) {
-    console.error('❌ Error in payment processing cron job:', error);
-    return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }, 
-      { status: 500 }
-    );
+    console.error("Payment processing cron job error:", error);
+    return NextResponse.json({
+      error: "Cron job failed",
+      message: error instanceof Error ? error.message : "Unknown error"
+    }, {status: 500});
   }
 }
