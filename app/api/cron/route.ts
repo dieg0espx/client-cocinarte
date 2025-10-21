@@ -73,15 +73,22 @@ async function sendClassesStatusEmail(classes: any[]) {
     classes.forEach((clase) => {
         const enrolled = clase.enrolled || 0;
         const maxStudents = clase.maxStudents || 0;
+        const minStudents = clase.minStudents || 0;
         const isFullyBooked = enrolled >= maxStudents;
+        const hasMinimum = enrolled >= minStudents;
         const availableSpots = maxStudents - enrolled;
         
         if (isFullyBooked) fullyBookedCount++;
         else availableCount++;
 
-        const statusBadge = isFullyBooked 
-            ? '<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">FULLY BOOKED</span>'
-            : `<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${availableSpots} SPOTS LEFT</span>`;
+        let statusBadge;
+        if (isFullyBooked) {
+            statusBadge = '<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">FULLY BOOKED</span>';
+        } else if (hasMinimum) {
+            statusBadge = `<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${availableSpots} SPOTS LEFT</span>`;
+        } else {
+            statusBadge = `<span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">NEEDS ${minStudents - enrolled} MORE</span>`;
+        }
 
         const classDate = new Date(clase.date).toLocaleDateString('en-US', { 
             weekday: 'short', 
@@ -96,6 +103,7 @@ async function sendClassesStatusEmail(classes: any[]) {
                 <td style="padding: 12px;">${classDate}</td>
                 <td style="padding: 12px;">${clase.time || 'N/A'}</td>
                 <td style="padding: 12px; text-align: center;">${enrolled}/${maxStudents}</td>
+                <td style="padding: 12px; text-align: center;">${minStudents}</td>
                 <td style="padding: 12px; text-align: center;">${statusBadge}</td>
             </tr>
         `;
@@ -138,11 +146,12 @@ async function sendClassesStatusEmail(classes: any[]) {
                                 <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Date</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151;">Time</th>
                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #374151;">Enrollment</th>
+                                <th style="padding: 12px; text-align: center; font-weight: 600; color: #374151;">Min Required</th>
                                 <th style="padding: 12px; text-align: center; font-weight: 600; color: #374151;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${classesHTML || '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #6b7280;">No classes found</td></tr>'}
+                            ${classesHTML || '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #6b7280;">No classes found</td></tr>'}
                         </tbody>
                     </table>
                 </div>
