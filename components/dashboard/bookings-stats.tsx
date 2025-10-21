@@ -40,11 +40,10 @@ export function BookingsStats({ userId }: BookingsStatsProps) {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
-      // Fetch all bookings for the user
+      // Admin dashboard - fetch ALL bookings, not filtered by user_id
       const { data: allBookings, error: allError } = await supabase
         .from('bookings')
         .select('*')
-        .eq('user_id', userId)
 
       if (allError) {
         throw new Error(`Error fetching bookings: ${allError.message}`)

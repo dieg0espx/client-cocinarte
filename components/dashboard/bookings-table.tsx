@@ -48,6 +48,7 @@ export function BookingsTable({ userId }: BookingsTableProps) {
       setLoading(true)
       const supabase = createClient()
       
+      // Admin dashboard - fetch ALL bookings, not filtered by user_id
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -67,7 +68,6 @@ export function BookingsTable({ userId }: BookingsTableProps) {
             email
           )
         `)
-        .eq('user_id', userId)
         .order('booking_date', { ascending: false })
 
       if (error) {
@@ -349,7 +349,7 @@ export function BookingsTable({ userId }: BookingsTableProps) {
                     <TableCell className="min-w-[100px]">
                       <div className="flex items-center">
                         <DollarSign className="h-3 w-3 mr-1 text-green-600" />
-                        <span className="font-medium text-sm">${booking.payment_amount}</span>
+                        <span className="font-medium text-sm">{booking.payment_amount}</span>
                       </div>
                     </TableCell>
                     <TableCell>
