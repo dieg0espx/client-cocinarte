@@ -1,14 +1,14 @@
 -- Update class dates to future dates for testing
 -- All times are in Los Angeles (America/Los_Angeles) timezone
 
--- Update 'Baking Fundamentals' - TOMORROW at 8:30 AM (HAS MINIMUM: 6/6, min=3)
+-- Update 'Baking Fundamentals' - TOMORROW at 9:30 AM (HAS MINIMUM: 6/6, min=3)
 UPDATE clases 
-SET date = '2025-10-22', time = '08:30:00', updated_at = NOW()
+SET date = '2025-10-22', time = '09:30:00', updated_at = NOW()
 WHERE id = '6234f7bf-c812-40a3-bddd-946a4d5c63ba';
 
--- Update 'Family Cooking Workshop' - TOMORROW at 8:30 AM (DOESN'T HAVE MINIMUM: 3/10, min=4)
+-- Update 'Family Cooking Workshop' - TOMORROW at 9:30 AM (DOESN'T HAVE MINIMUM: 3/10, min=4)
 UPDATE clases 
-SET date = '2025-10-22', time = '08:30:00', updated_at = NOW()
+SET date = '2025-10-22', time = '09:30:00', updated_at = NOW()
 WHERE id = 'e4a9aa17-1488-4693-b490-d4bc5b1a0890';
 
 -- Update 'gfwq4g' - Later date

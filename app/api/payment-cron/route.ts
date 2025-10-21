@@ -457,7 +457,7 @@ async function processClassComplete(clase: any) {
     // Check if this class has already been processed
     const alreadyProcessed = await hasClassBeenProcessed(clase.id);
     if (alreadyProcessed) {
-        console.log(`   ⏭️ SKIPPING - This class was already processed (emails sent, payments processed)`);
+        console.log(`   ⏭️ SKIPPING - This class was already processed (emails sent 24 hours before)`);
         return {
             classTitle,
             hasMinimum,
@@ -470,6 +470,7 @@ async function processClassComplete(clase: any) {
         };
     }
 
+    console.log(`   ✨ FIRST TIME in 24-hour window - Processing now`);
     console.log(`   Enrollment: ${enrolled}/${maxStudents} (minimum: ${minStudents})`);
     console.log(`   Status: ${hasMinimum ? '✅ WILL PROCEED (Has minimum)' : '❌ WILL BE CANCELLED (Below minimum)'}`);
 
@@ -556,7 +557,8 @@ async function processClassComplete(clase: any) {
         emailsCancelled,
         paymentsCaptured,
         paymentsCanceled,
-        paymentsFailed
+        paymentsFailed,
+        skipped: false
     };
 }
 
