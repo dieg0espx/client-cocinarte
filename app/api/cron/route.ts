@@ -2,7 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const revalidate = 0;
 
-const GET = async (request: NextRequest) => {
+export async function GET(request: NextRequest) {
     console.log("Hello World - Cron job is working");
-    return NextResponse.json({ message: "Hello World" }, {status: 200});
+    
+    const timestamp = new Date().toISOString();
+    console.log(`Cron executed at: ${timestamp}`);
+    
+    return NextResponse.json({
+        message: "Hello World", 
+        timestamp,
+        status: "success"
+    }, {status: 200});
 }
