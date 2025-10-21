@@ -156,6 +156,10 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
         setPaymentError('')
         
         try {
+          // Get student information to fetch parent name
+          const studentsService = new StudentsClientService()
+          const studentInfo = await studentsService.getStudentByEmail(user.email!)
+          
           const response = await fetch('/api/create-payment-intent', {
             method: 'POST',
             headers: {
@@ -164,7 +168,8 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
             body: JSON.stringify({
               amount: selectedClassData.price,
               classTitle: selectedClassData.title,
-              userName: childName,
+              userName: studentInfo?.parent_name || parentName || user.user_metadata?.full_name || 'Parent',
+              studentName: studentInfo?.child_name || childName || 'Student',
               userEmail: user.email,
               classId: selectedClassData.id,
               classDate: selectedClassData.date,
