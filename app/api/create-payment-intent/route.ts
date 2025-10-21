@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +25,36 @@ export async function POST(request: NextRequest) {
     if (!amount || !classTitle || !classId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Check if class is already full (prevent overbooking)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: classData, error: classError } = await supabase
+      .from('clases')
+      .select('enrolled, maxStudents')
+      .eq('id', classId)
+      .single();
+
+    if (classError || !classData) {
+      console.error('Error fetching class data:', classError);
+      return NextResponse.json(
+        { error: 'Class not found' },
+        { status: 404 }
+      );
+    }
+
+    const enrolled = classData.enrolled || 0;
+    const maxStudents = classData.maxStudents || 0;
+
+    if (enrolled >= maxStudents) {
+      return NextResponse.json(
+        { error: 'Sorry, this class is now full. Please choose another class.' },
         { status: 400 }
       );
     }

@@ -21,6 +21,7 @@ export interface CreateBookingData {
   payment_amount: number;
   payment_method?: 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'stripe';
   payment_status?: 'pending' | 'completed' | 'failed' | 'refunded' | 'held' | 'canceled';
+  booking_status?: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   stripe_payment_intent_id?: string;
   notes?: string;
 }
