@@ -259,6 +259,78 @@ async function sendClassConfirmationEmail(student: any, clase: any) {
 }
 
 /**
+ * Send payment failure email (class confirmed but payment failed)
+ */
+async function sendPaymentFailureEmail(student: any, clase: any) {
+    const parentName = (student.students as any)?.parent_name || 'Parent';
+    const childName = (student.students as any)?.child_name || 'your child';
+    const email = (student.students as any)?.email;
+
+    if (!email) {
+        console.log(`  ⚠️ No email for ${childName}`);
+        return false;
+    }
+
+    const classDate = new Date(clase.date).toLocaleDateString('en-US', { 
+        timeZone: 'America/Los_Angeles',
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    });
+    
+    const mailOptions = {
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to: email,
+        subject: `⚠️ Payment Issue: ${clase.title}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #f59e0b; color: white; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0;">⚠️ Payment Processing Issue</h1>
+                </div>
+                <div style="padding: 20px;">
+                    <p>Hello ${parentName},</p>
+                    <p>Good news: The class <strong>${childName}</strong> enrolled in has reached minimum capacity and will proceed!</p>
+                    
+                    <div style="background: #f3f4f6; padding: 15px; margin: 15px 0;">
+                        <h3>Class Details:</h3>
+                        <p><strong>${clase.title}</strong></p>
+                        <p>📅 ${classDate} at ${clase.time}</p>
+                        <p>⏱️ ${clase.classDuration} minutes</p>
+                    </div>
+
+                    <div style="background: #fef3c7; padding: 15px; margin: 15px 0; border-left: 4px solid #f59e0b;">
+                        <h3 style="margin-top: 0; color: #92400e;">⚠️ Payment Issue</h3>
+                        <p style="color: #92400e; margin: 10px 0;">We were unable to capture the payment for this class. This may be due to:</p>
+                        <ul style="color: #92400e; margin: 10px 0;">
+                            <li>Insufficient funds</li>
+                            <li>Expired card</li>
+                            <li>Card declined by bank</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #dcfce7; padding: 15px; margin: 15px 0; border-left: 4px solid #16a34a;">
+                        <h3 style="margin-top: 0; color: #166534;">📞 Action Required</h3>
+                        <p style="color: #166534; margin: 10px 0;">Please contact us immediately to update your payment method and secure ${childName}'s spot:</p>
+                        <p style="color: #166534; margin: 10px 0;"><strong>Email:</strong> info@cocinartepdx.com</p>
+                        <p style="color: #166534; margin: 10px 0;"><strong>Phone:</strong> Contact information</p>
+                    </div>
+
+                    <p>We want to ensure ${childName} can attend this class! Please reach out as soon as possible.</p>
+                    <p>Thank you for your understanding!</p>
+                </div>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`  ✅ Payment failure notification sent to ${email}`);
+        return true;
+    } catch (error: any) {
+        console.error(`  ❌ Error sending to ${email}:`, error.message);
+        return false;
+    }
+}
+
+/**
  * Send class cancellation email (didn't reach minimum)
  */
 async function sendClassCancellationEmail(student: any, clase: any) {
@@ -437,44 +509,16 @@ async function processClassComplete(clase: any) {
 
     let emailsConfirmed = 0;
     let emailsCancelled = 0;
+    let emailsPaymentFailed = 0;
     let paymentsCaptured = 0;
     let paymentsCanceled = 0;
     let paymentsFailed = 0;
 
-    // STEP 1: Update ALL booking statuses based on minimum enrollment
-    console.log(`\n   📝 Updating booking statuses in database...`);
-    if (hasMinimum) {
-        // Class CONFIRMED - update all bookings to confirmed
-        console.log(`   ✅ Class HAS minimum → Setting all bookings to CONFIRMED`);
-        await updateAllBookingStatuses(clase.id, 'completed', 'confirmed');
-    } else {
-        // Class CANCELLED - update all bookings to cancelled
-        console.log(`   ❌ Class DOESN'T have minimum → Setting all bookings to CANCELLED`);
-        await updateAllBookingStatuses(
-            clase.id, 
-            'canceled', 
-            'cancelled', 
-            'Class cancelled - did not reach minimum enrollment'
-        );
-    }
-
-    // STEP 2: Send emails to all students
-    for (const student of allStudents) {
-        const childName = (student.students as any)?.child_name || 'Student';
-        const email = (student.students as any)?.email;
-        
-        console.log(`\n   👤 Student: ${childName} (${email})`);
-
-        if (hasMinimum) {
-            const success = await sendClassConfirmationEmail(student, clase);
-            if (success) emailsConfirmed++;
-        } else {
-            const success = await sendClassCancellationEmail(student, clase);
-            if (success) emailsCancelled++;
-        }
-    }
-
-    // STEP 3: Process payments for held bookings
+    // STEP 1: Process payments FIRST for held bookings
+    console.log(`\n   💳 Processing payments first...`);
+    const successfulBookingIds = new Set<string>();
+    const failedBookingIds = new Set<string>();
+    
     for (const heldBooking of heldBookings) {
         const studentName = (heldBooking.students as any)?.child_name || 'Unknown Student';
         const parentEmail = (heldBooking.students as any)?.email || 'No email';
@@ -489,8 +533,10 @@ async function processClassComplete(clase: any) {
             );
             if (success) {
                 paymentsCaptured++;
+                successfulBookingIds.add(heldBooking.id);
             } else {
                 paymentsFailed++;
+                failedBookingIds.add(heldBooking.id);
             }
         } else {
             // Cancel authorization
@@ -506,11 +552,67 @@ async function processClassComplete(clase: any) {
         }
     }
 
+    // STEP 2: Update booking statuses for those without held payments
+    console.log(`\n   📝 Updating booking statuses for non-held payments...`);
+    if (hasMinimum) {
+        // Class CONFIRMED - update bookings that aren't held (direct bookings, etc.)
+        console.log(`   ✅ Class HAS minimum → Setting non-held bookings to CONFIRMED`);
+        const { error } = await supabase
+            .from('bookings')
+            .update({ 
+                payment_status: 'completed',
+                booking_status: 'confirmed'
+            })
+            .eq('class_id', clase.id)
+            .neq('payment_status', 'held')
+            .in('booking_status', ['confirmed', 'pending']);
+        
+        if (error) {
+            console.error('Error updating non-held bookings:', error);
+        }
+    } else {
+        // Class CANCELLED - update all bookings to cancelled
+        console.log(`   ❌ Class DOESN'T have minimum → Setting all bookings to CANCELLED`);
+        await updateAllBookingStatuses(
+            clase.id, 
+            'canceled', 
+            'cancelled', 
+            'Class cancelled - did not reach minimum enrollment'
+        );
+    }
+
+    // STEP 3: Send emails to students (ONLY send confirmation if payment succeeded)
+    for (const student of allStudents) {
+        const childName = (student.students as any)?.child_name || 'Student';
+        const email = (student.students as any)?.email;
+        const bookingId = student.id;
+        
+        console.log(`\n   👤 Student: ${childName} (${email})`);
+
+        if (hasMinimum) {
+            // Check if this booking had a payment that failed
+            if (failedBookingIds.has(bookingId)) {
+                console.log(`   ⚠️ Payment failed - sending payment failure email`);
+                // Send payment failure notification
+                const success = await sendPaymentFailureEmail(student, clase);
+                if (success) emailsPaymentFailed++;
+            } else {
+                // Send confirmation email (payment succeeded or no held payment required)
+                const success = await sendClassConfirmationEmail(student, clase);
+                if (success) emailsConfirmed++;
+            }
+        } else {
+            const success = await sendClassCancellationEmail(student, clase);
+            if (success) emailsCancelled++;
+        }
+    }
+
     return {
         classTitle,
         hasMinimum,
         emailsConfirmed,
         emailsCancelled,
+        emailsPaymentFailed,
         paymentsCaptured,
         paymentsCanceled,
         paymentsFailed
@@ -564,6 +666,7 @@ async function performPaymentProcessingTask() {
         
         const totalEmailsConfirmed = results.reduce((sum, r) => sum + r.emailsConfirmed, 0);
         const totalEmailsCancelled = results.reduce((sum, r) => sum + r.emailsCancelled, 0);
+        const totalEmailsPaymentFailed = results.reduce((sum, r) => sum + (r.emailsPaymentFailed || 0), 0);
         const totalPaymentsCaptured = results.reduce((sum, r) => sum + r.paymentsCaptured, 0);
         const totalPaymentsCanceled = results.reduce((sum, r) => sum + r.paymentsCanceled, 0);
         const totalPaymentsFailed = results.reduce((sum, r) => sum + r.paymentsFailed, 0);
@@ -571,6 +674,7 @@ async function performPaymentProcessingTask() {
         console.log('\n📧 EMAILS SENT:');
         console.log(`   ✅ Confirmation emails: ${totalEmailsConfirmed}`);
         console.log(`   ❌ Cancellation emails: ${totalEmailsCancelled}`);
+        console.log(`   ⚠️ Payment failure alerts: ${totalEmailsPaymentFailed}`);
         
         console.log('\n💳 PAYMENTS PROCESSED:');
         console.log(`   ✅ Payments captured (charged): ${totalPaymentsCaptured}`);
@@ -581,7 +685,7 @@ async function performPaymentProcessingTask() {
         results.forEach(result => {
             console.log(`\n   ${result.classTitle}:`);
             console.log(`      Status: ${result.hasMinimum ? '✅ Proceeding' : '❌ Cancelled'}`);
-            console.log(`      Emails: ${result.emailsConfirmed + result.emailsCancelled} sent`);
+            console.log(`      Emails: ${result.emailsConfirmed} confirmed | ${result.emailsCancelled} cancelled | ${result.emailsPaymentFailed || 0} payment failed`);
             console.log(`      Payments: ${result.paymentsCaptured} captured | ${result.paymentsCanceled} canceled | ${result.paymentsFailed} failed`);
         });
 
