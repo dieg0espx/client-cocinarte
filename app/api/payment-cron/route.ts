@@ -73,13 +73,16 @@ async function fetchClassesStartingSoon() {
 
 /**
  * Fetch classes that start in approximately 24 hours (1 day)
- * We check classes between 23.5 and 24.5 hours from now (Los Angeles time)
+ * We check classes within ±30 minutes of exactly 24 hours from now (Los Angeles time)
+ * This ensures each class is only found once per hour check
  */
 async function fetchClassesStartingTomorrow() {
     try {
         const now = new Date();
         const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-        const twentyThreeHalfHoursFromNow = new Date(now.getTime() + 23.5 * 60 * 60 * 1000);
+        // Check ±30 minutes around 24 hours
+        const startWindow = new Date(now.getTime() + (24 * 60 - 30) * 60 * 1000); // 23:30 hours
+        const endWindow = new Date(now.getTime() + (24 * 60 + 30) * 60 * 1000);   // 24:30 hours
         
         // Convert to Los Angeles timezone date string (YYYY-MM-DD)
         const dateParts = twentyFourHoursFromNow.toLocaleDateString('en-US', {
@@ -91,7 +94,7 @@ async function fetchClassesStartingTomorrow() {
         const targetDate = `${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`; // Convert to YYYY-MM-DD
         
         // Get target time in HH:MM:SS format (LA timezone)
-        const targetTimeStart = twentyThreeHalfHoursFromNow.toLocaleTimeString('en-US', {
+        const targetTimeStart = startWindow.toLocaleTimeString('en-US', {
             timeZone: 'America/Los_Angeles',
             hour12: false,
             hour: '2-digit',
@@ -99,7 +102,7 @@ async function fetchClassesStartingTomorrow() {
             second: '2-digit'
         });
         
-        const targetTimeEnd = twentyFourHoursFromNow.toLocaleTimeString('en-US', {
+        const targetTimeEnd = endWindow.toLocaleTimeString('en-US', {
             timeZone: 'America/Los_Angeles',
             hour12: false,
             hour: '2-digit',
@@ -109,7 +112,7 @@ async function fetchClassesStartingTomorrow() {
 
         console.log(`   🔍 Looking for classes on ${targetDate} between ${targetTimeStart} and ${targetTimeEnd} (LA time)`);
         console.log(`   📅 Current LA time: ${now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })}`);
-        console.log(`   ⏰ 24 hours from now: ${twentyFourHoursFromNow.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })}`);
+        console.log(`   ⏰ Checking window: ±30 minutes around 24 hours from now`);
 
         const { data, error } = await supabase
             .from('clases')
@@ -410,39 +413,6 @@ async function updateAllBookingStatuses(classId: string, paymentStatus: string, 
 }
 
 /**
- * Check if a class has already been processed (24-hour notification sent)
- */
-async function hasClassBeenProcessed(classId: string) {
-    try {
-        // Check if any booking for this class is NOT in pending status
-        // If all bookings are confirmed or cancelled, it means we already processed this class
-        const { data, error } = await supabase
-            .from('bookings')
-            .select('booking_status, payment_status')
-            .eq('class_id', classId);
-
-        if (error) {
-            console.error('Error checking if class was processed:', error);
-            return false;
-        }
-
-        if (!data || data.length === 0) {
-            return false; // No bookings, hasn't been processed
-        }
-
-        // If all bookings are already confirmed or cancelled (not pending), it's been processed
-        const allProcessed = data.every(booking => 
-            booking.booking_status === 'confirmed' || booking.booking_status === 'cancelled'
-        );
-
-        return allProcessed;
-    } catch (error) {
-        console.error('Error in hasClassBeenProcessed:', error);
-        return false;
-    }
-}
-
-/**
  * Process a class completely - send emails AND process payments
  */
 async function processClassComplete(clase: any) {
@@ -452,25 +422,7 @@ async function processClassComplete(clase: any) {
     const maxStudents = clase.maxStudents || 0;
     const hasMinimum = enrolled >= minStudents;
 
-    console.log(`\n📚 Checking class: ${classTitle}`);
-    
-    // Check if this class has already been processed
-    const alreadyProcessed = await hasClassBeenProcessed(clase.id);
-    if (alreadyProcessed) {
-        console.log(`   ⏭️ SKIPPING - This class was already processed (emails sent 24 hours before)`);
-        return {
-            classTitle,
-            hasMinimum,
-            emailsConfirmed: 0,
-            emailsCancelled: 0,
-            paymentsCaptured: 0,
-            paymentsCanceled: 0,
-            paymentsFailed: 0,
-            skipped: true
-        };
-    }
-
-    console.log(`   ✨ FIRST TIME in 24-hour window - Processing now`);
+    console.log(`\n📚 Processing class: ${classTitle}`);
     console.log(`   Enrollment: ${enrolled}/${maxStudents} (minimum: ${minStudents})`);
     console.log(`   Status: ${hasMinimum ? '✅ WILL PROCEED (Has minimum)' : '❌ WILL BE CANCELLED (Below minimum)'}`);
 
@@ -557,8 +509,7 @@ async function processClassComplete(clase: any) {
         emailsCancelled,
         paymentsCaptured,
         paymentsCanceled,
-        paymentsFailed,
-        skipped: false
+        paymentsFailed
     };
 }
 
@@ -607,44 +558,28 @@ async function performPaymentProcessingTask() {
         console.log('📊 PROCESSING SUMMARY (24 Hours Before Class)');
         console.log('='.repeat(80));
         
-        const skippedClasses = results.filter(r => r.skipped);
-        const processedClasses = results.filter(r => !r.skipped);
-        
-        console.log(`\n📝 CLASSES FOUND: ${classes.length}`);
-        console.log(`   ⏭️ Already processed (skipped): ${skippedClasses.length}`);
-        console.log(`   ✨ Newly processed: ${processedClasses.length}`);
-        
-        if (processedClasses.length > 0) {
-            const totalEmailsConfirmed = processedClasses.reduce((sum, r) => sum + r.emailsConfirmed, 0);
-            const totalEmailsCancelled = processedClasses.reduce((sum, r) => sum + r.emailsCancelled, 0);
-            const totalPaymentsCaptured = processedClasses.reduce((sum, r) => sum + r.paymentsCaptured, 0);
-            const totalPaymentsCanceled = processedClasses.reduce((sum, r) => sum + r.paymentsCanceled, 0);
-            const totalPaymentsFailed = processedClasses.reduce((sum, r) => sum + r.paymentsFailed, 0);
+        const totalEmailsConfirmed = results.reduce((sum, r) => sum + r.emailsConfirmed, 0);
+        const totalEmailsCancelled = results.reduce((sum, r) => sum + r.emailsCancelled, 0);
+        const totalPaymentsCaptured = results.reduce((sum, r) => sum + r.paymentsCaptured, 0);
+        const totalPaymentsCanceled = results.reduce((sum, r) => sum + r.paymentsCanceled, 0);
+        const totalPaymentsFailed = results.reduce((sum, r) => sum + r.paymentsFailed, 0);
 
-            console.log('\n📧 EMAILS SENT:');
-            console.log(`   ✅ Confirmation emails: ${totalEmailsConfirmed}`);
-            console.log(`   ❌ Cancellation emails: ${totalEmailsCancelled}`);
-            
-            console.log('\n💳 PAYMENTS PROCESSED:');
-            console.log(`   ✅ Payments captured (charged): ${totalPaymentsCaptured}`);
-            console.log(`   🚫 Payments canceled (released): ${totalPaymentsCanceled}`);
-            console.log(`   ❌ Failed operations: ${totalPaymentsFailed}`);
-            
-            console.log('\n📋 NEWLY PROCESSED CLASSES:');
-            processedClasses.forEach(result => {
-                console.log(`\n   ${result.classTitle}:`);
-                console.log(`      Status: ${result.hasMinimum ? '✅ Proceeding' : '❌ Cancelled'}`);
-                console.log(`      Emails: ${result.emailsConfirmed + result.emailsCancelled} sent`);
-                console.log(`      Payments: ${result.paymentsCaptured} captured | ${result.paymentsCanceled} canceled | ${result.paymentsFailed} failed`);
-            });
-        }
+        console.log('\n📧 EMAILS SENT:');
+        console.log(`   ✅ Confirmation emails: ${totalEmailsConfirmed}`);
+        console.log(`   ❌ Cancellation emails: ${totalEmailsCancelled}`);
         
-        if (skippedClasses.length > 0) {
-            console.log('\n⏭️ SKIPPED CLASSES (already processed):');
-            skippedClasses.forEach(result => {
-                console.log(`   - ${result.classTitle}`);
-            });
-        }
+        console.log('\n💳 PAYMENTS PROCESSED:');
+        console.log(`   ✅ Payments captured (charged): ${totalPaymentsCaptured}`);
+        console.log(`   🚫 Payments canceled (released): ${totalPaymentsCanceled}`);
+        console.log(`   ❌ Failed operations: ${totalPaymentsFailed}`);
+        
+        console.log('\n📋 DETAILS BY CLASS:');
+        results.forEach(result => {
+            console.log(`\n   ${result.classTitle}:`);
+            console.log(`      Status: ${result.hasMinimum ? '✅ Proceeding' : '❌ Cancelled'}`);
+            console.log(`      Emails: ${result.emailsConfirmed + result.emailsCancelled} sent`);
+            console.log(`      Payments: ${result.paymentsCaptured} captured | ${result.paymentsCanceled} canceled | ${result.paymentsFailed} failed`);
+        });
 
         console.log('\n' + '='.repeat(80));
         console.log('✅ Booking check completed successfully');
@@ -653,9 +588,7 @@ async function performPaymentProcessingTask() {
 
         return {
             message: 'Payment processing completed',
-            classesFound: classes.length,
-            classesSkipped: skippedClasses.length,
-            classesProcessed: processedClasses.length,
+            classesProcessed: classes.length,
             results
         };
         
