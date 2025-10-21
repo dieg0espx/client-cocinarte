@@ -337,7 +337,7 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     try {
       // Check if class is already full (prevent overbooking)
       const clasesService = new ClasesClientService()
-      const currentClass = await clasesService.getClassById(selectedClassData.id)
+      const currentClass = await clasesService.getClaseById(selectedClassData.id)
       
       if (!currentClass) {
         setPaymentError('Class not found. Please try again.')
