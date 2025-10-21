@@ -393,18 +393,19 @@ async function updateAllBookingStatuses(classId: string, paymentStatus: string, 
             updateData.notes = notes;
         }
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('bookings')
             .update(updateData)
             .eq('class_id', classId)
-            .in('booking_status', ['confirmed', 'pending']);
+            .in('booking_status', ['confirmed', 'pending'])
+            .select();
 
         if (error) {
             console.error('Error updating booking statuses:', error);
             return false;
         }
 
-        console.log(`  ✅ Updated all booking statuses to: ${bookingStatus}`);
+        console.log(`   ✅ Updated ${data?.length || 0} bookings to status: ${bookingStatus}`);
         return true;
     } catch (error) {
         console.error('Error in updateAllBookingStatuses:', error);
@@ -441,11 +442,14 @@ async function processClassComplete(clase: any) {
     let paymentsFailed = 0;
 
     // STEP 1: Update ALL booking statuses based on minimum enrollment
+    console.log(`\n   📝 Updating booking statuses in database...`);
     if (hasMinimum) {
-        // Class confirmed - update all bookings to confirmed
+        // Class CONFIRMED - update all bookings to confirmed
+        console.log(`   ✅ Class HAS minimum → Setting all bookings to CONFIRMED`);
         await updateAllBookingStatuses(clase.id, 'completed', 'confirmed');
     } else {
-        // Class cancelled - update all bookings to cancelled
+        // Class CANCELLED - update all bookings to cancelled
+        console.log(`   ❌ Class DOESN'T have minimum → Setting all bookings to CANCELLED`);
         await updateAllBookingStatuses(
             clase.id, 
             'canceled', 

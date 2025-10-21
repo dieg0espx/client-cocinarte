@@ -335,6 +335,25 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     }
 
     try {
+      // Check if class is already full (prevent overbooking)
+      const clasesService = new ClasesClientService()
+      const currentClass = await clasesService.getClassById(selectedClassData.id)
+      
+      if (!currentClass) {
+        setPaymentError('Class not found. Please try again.')
+        setPaymentLoading(false)
+        return
+      }
+
+      const enrolled = currentClass.enrolled || 0
+      const maxStudents = currentClass.maxStudents || 0
+
+      if (enrolled >= maxStudents) {
+        setPaymentError('Sorry, this class is now full. Please choose another class.')
+        setPaymentLoading(false)
+        return
+      }
+
       // Get student information
       const studentsService = new StudentsClientService()
       const studentInfo = await studentsService.getStudentByEmail(user.email!)
@@ -354,12 +373,12 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
         payment_amount: selectedClassData.price,
         payment_method: 'stripe',
         payment_status: 'held',
+        booking_status: 'pending',
         stripe_payment_intent_id: paymentIntentId,
         notes: `Booking for ${selectedClassData.title} on ${formatDate(selectedClassData.date)} at ${formatTime(selectedClassData.time)}. Payment is on HOLD and will be charged 24 hours before class if minimum enrollment is reached.`
       })
 
       // Update enrolled count in the class
-      const clasesService = new ClasesClientService()
       await clasesService.updateClassEnrollment(selectedClassData.id, 1)
       
       // Send confirmation emails
