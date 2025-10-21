@@ -1183,9 +1183,14 @@ export default function CocinarteMonthlyCalendar() {
                     setIsDialogOpen(false)
                     setIsBookingOpen(true)
                   }}
-                  className="bg-cocinarte-red hover:bg-cocinarte-orange text-cocinarte-white font-bold rounded-xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-base lg:text-lg flex-[0.7]"
+                  disabled={selectedClass.enrolled >= selectedClass.maxStudents}
+                  className={`${
+                    selectedClass.enrolled >= selectedClass.maxStudents 
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                      : 'bg-cocinarte-red hover:bg-cocinarte-orange text-cocinarte-white'
+                  } font-bold rounded-xl px-4 sm:px-6 lg:px-8 py-2 sm:py-3 text-sm sm:text-base lg:text-lg flex-[0.7]`}
                 >
-                  Book This Class
+                  {selectedClass.enrolled >= selectedClass.maxStudents ? 'Class Full' : 'Book This Class'}
                 </Button>
                 <Button 
                   variant="outline" 

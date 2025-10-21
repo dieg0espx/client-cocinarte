@@ -440,15 +440,19 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
     <div className="space-y-6">
       {/* Available Classes Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {classes.map((clase) => (
+        {classes.map((clase) => {
+          const isClassFull = (clase.enrolled || 0) >= clase.maxStudents;
+          return (
           <Card 
             key={clase.id} 
-            className={`cursor-pointer transition-all duration-300 hover:shadow-xl border-2 ${
-              selectedClassId === clase.id 
-                ? 'border-cocinarte-navy shadow-lg bg-cocinarte-navy/5' 
-                : 'border-slate-200 hover:border-cocinarte-navy/50 hover:shadow-md'
+            className={`transition-all duration-300 border-2 ${
+              isClassFull
+                ? 'border-gray-300 bg-gray-50 opacity-60 cursor-not-allowed'
+                : selectedClassId === clase.id 
+                  ? 'border-cocinarte-navy shadow-lg bg-cocinarte-navy/5 cursor-pointer' 
+                  : 'border-slate-200 hover:border-cocinarte-navy/50 hover:shadow-md cursor-pointer hover:shadow-xl'
             }`}
-            onClick={() => handleClassSelect(clase.id)}
+            onClick={() => !isClassFull && handleClassSelect(clase.id)}
           >
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between gap-3">
@@ -512,13 +516,21 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-bold text-gray-500">${clase.price}</span>
                 </div>
-                <div className="text-sm text-slate-500 bg-slate-50 px-3 py-1 rounded-full">
-                  {clase.enrolled || 0} enrolled
+                <div className={`text-sm px-3 py-1 rounded-full ${
+                  (clase.enrolled || 0) >= clase.maxStudents
+                    ? 'bg-red-100 text-red-700 font-semibold'
+                    : 'bg-slate-50 text-slate-500'
+                }`}>
+                  {(clase.enrolled || 0) >= clase.maxStudents 
+                    ? 'Class Full' 
+                    : `${clase.enrolled || 0} enrolled`
+                  }
                 </div>
               </div>
             </CardContent>
           </Card>
-        ))}
+        )}
+        )}
       </div>
 
       {/* No Classes Message */}
@@ -585,11 +597,18 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
         </Button>
         <Button 
           onClick={handleBookClass}
-          disabled={!selectedClassId}
+          disabled={!selectedClassId || (selectedClassData && (selectedClassData.enrolled || 0) >= selectedClassData.maxStudents)}
           size="lg"
-          className="bg-cocinarte-red hover:bg-cocinarte-red/90 text-white px-8"
+          className={`px-8 ${
+            selectedClassData && (selectedClassData.enrolled || 0) >= selectedClassData.maxStudents
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-cocinarte-red hover:bg-cocinarte-red/90 text-white'
+          }`}
         >
-          Book This Class
+          {selectedClassData && (selectedClassData.enrolled || 0) >= selectedClassData.maxStudents 
+            ? 'Class Full' 
+            : 'Book This Class'
+          }
         </Button>
       </div>
     </div>
