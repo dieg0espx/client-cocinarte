@@ -390,7 +390,7 @@ export default function CocinarteBookingPopup({ isOpen, onClose, selectedClass, 
           },
           body: JSON.stringify({
             userEmail: user.email,
-            userName: user.user_metadata?.full_name || user.email,
+            userName: studentInfo.parent_name || user.user_metadata?.full_name || 'Parent',
             studentName: studentInfo.child_name,
             classTitle: selectedClassData.title,
             classDate: selectedClassData.date,
