@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     });
 
     const body = await request.json();
-    const { amount, classTitle, userName, classId, classDate, classTime } = body;
+    const { amount, classTitle, userName, classId, classDate, classTime, userEmail } = body;
 
     // Validate required fields
     if (!amount || !classTitle || !classId) {
@@ -65,9 +65,11 @@ export async function POST(request: NextRequest) {
       currency: 'usd',
       description: `${classTitle}${userName ? ` - ${userName}` : ''}`,
       capture_method: 'manual', // ← KEY: This holds the payment instead of charging immediately
+      receipt_email: userEmail, // Send receipt to customer email
       metadata: {
         className: classTitle,
         customerName: userName || 'Guest',
+        customerEmail: userEmail || '',
         classId: classId,
         classDate: classDate || '',
         classTime: classTime || '',
