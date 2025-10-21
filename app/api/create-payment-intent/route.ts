@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     });
 
     const body = await request.json();
-    const { amount, classTitle, userName, classId, classDate, classTime, userEmail } = body;
+    const { amount, classTitle, userName, studentName, classId, classDate, classTime, userEmail } = body;
 
     // Validate required fields
     if (!amount || !classTitle || !classId) {
@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         className: classTitle,
         customerName: userName || 'Guest',
+        studentName: studentName || '',
         customerEmail: userEmail || '',
         classId: classId,
         classDate: classDate || '',
