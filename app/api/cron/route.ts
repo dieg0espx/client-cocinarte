@@ -91,6 +91,7 @@ async function sendClassesStatusEmail(classes: any[]) {
         }
 
         const classDate = new Date(clase.date).toLocaleDateString('en-US', { 
+            timeZone: 'America/Los_Angeles',
             weekday: 'short', 
             year: 'numeric', 
             month: 'short', 
@@ -178,8 +179,16 @@ export async function GET(request: NextRequest) {
     try {
         console.log("Cron job started - Fetching classes and sending email...");
         
-        const timestamp = new Date().toISOString();
-        console.log(`Cron executed at: ${timestamp}`);
+        const timestamp = new Date().toLocaleString('en-US', { 
+            timeZone: 'America/Los_Angeles',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        console.log(`Cron executed at (LA time): ${timestamp}`);
         
         // Fetch all classes
         const classes = await fetchAllClasses();
